@@ -1,0 +1,6 @@
+#ifndef __MULTIDIM_DEFINITION_H__
+#define __MULTIDIM_DEFINITION_H__
+
+
+
+#endif//__MULTIDIM_DEFINITION_H__
