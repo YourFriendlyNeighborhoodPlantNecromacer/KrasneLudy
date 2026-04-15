@@ -1,13 +1,6 @@
 #ifndef __LOCATIONS_H__
 #define __LOCATIONS_H__
 
-enum location_type{
-    debug = -1,
-    road = 0,
-    house = 1,
-    workplace = 2
-};
-
 class location{
     public:
     enum axis{
@@ -15,21 +8,36 @@ class location{
         y,
         elevation
     };
-
-    location();
-    location(location_type type) : type(type), coordinates(){};
-    location(double* coordinates) : type(location_type::debug), coordinates(){}
-    location(location_type type, double* coordinates) : type(type), coordinates(){
-        for(int i=0; i<3; i++)this->coordinates[0] = coordinates[0];
+    enum building_type{
+        debug = -1,
+        road = 0,
+        house = 1,
+        workplace = 2
     };
 
-    // copyconst
+    struct road{
+        //properties...;
+        location* leads_to;
+        road():leads_to(nullptr);
+    };
 
-    location_type type;
+    dynamic_array<road> connected_to;
+    building_type type;
     double coordinates[3]; ///X Y ELEVATION
     //autosorted_dynamic_array<location> a;
+
+    void dp(){
+        std::cout << "COORDINATES: " << std::endl;
+        std::cout << "X:" << X << "   Y:" << Y << "   Z:" << Z << std::endl;
+    }
 };
 
-
+std::ostream& operator << (std::ostream &os, const location structure){
+    os << "Can i get number fifteennn";
+    return os;
+}
 
 #endif//__LOCATIONS_H__
+
+
+// 29 kwietnia (45)

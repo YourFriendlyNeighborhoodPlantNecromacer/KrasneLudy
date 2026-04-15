@@ -4,8 +4,11 @@
 
 int main(){
     std::cout << "Hello world!" << std::endl;
-    queue<int> a;
-    autosorted_dynamic_array<int> b;
+    country farland;
+    farland.insert(new location);
+    farland.insert(new location);
+    farland.insert(new location);
+    farland.dp();
 
     return 0;
 }
