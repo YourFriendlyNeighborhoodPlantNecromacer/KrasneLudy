@@ -101,7 +101,9 @@ void country::dp(int64_t tabulation){
     tab(tabulation);
     for(int i=0; i<locations.get_last_index(); i++){
         tab(tabulation + 3);
-        std::cout << "i:" << i << "   locations[i]:" << locations[i] << std::endl;
+        std::cout << "i:" << i << "   locations[i]:" << std::endl;
+        locations[i]->dp();
+        std::cout<< std::endl;
     }
     tab(tabulation);
     std::cout << "<<<" << std::endl;

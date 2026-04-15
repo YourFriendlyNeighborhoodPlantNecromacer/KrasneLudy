@@ -151,7 +151,7 @@
 
 1775138495 /home/fnpl/GLUGLU/KrasnoLudki/DataStructures/Country.h
 
-1776240660 source:/home/fnpl/KrasnoLudki/main.cpp
+1776256355 source:/home/fnpl/KrasnoLudki/main.cpp
 	<iostream>
 	"GLUGLU/GLUGLU.h"
 	"DataStructures/DataStructures.h"
@@ -285,13 +285,13 @@
 
 1776237912 /home/fnpl/KrasnoLudki/GLUGLU/datastructures/matrixes/adjacency_list/adjacency_list_definition.h
 
-1776247529 /home/fnpl/KrasnoLudki/DataStructures/DataStructures.h
+1776257250 /home/fnpl/KrasnoLudki/DataStructures/DataStructures.h
 	"Location.h"
 	"Country.h"
 
-1776255479 /home/fnpl/KrasnoLudki/DataStructures/Location.h
+1776256062 /home/fnpl/KrasnoLudki/DataStructures/Location.h
 
-1776240739 /home/fnpl/KrasnoLudki/DataStructures/Country.h
+1776256272 /home/fnpl/KrasnoLudki/DataStructures/Country.h
 
 1776238724 /home/fnpl/KrasnoLudki/GLUGLU/datastructures/linear/autosorted_dynamic_array/autosorted_dynamic_array.h
 	"autosorted_dynamic_array_definition.h"

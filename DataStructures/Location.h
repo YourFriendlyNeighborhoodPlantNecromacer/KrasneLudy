@@ -4,13 +4,13 @@
 class location{
     public:
     enum axis{
-        x,
-        y,
-        elevation
+        X,
+        Y,
+        Z
     };
     enum building_type{
         debug = -1,
-        road = 0,
+        path = 0,
         house = 1,
         workplace = 2
     };
@@ -18,7 +18,7 @@ class location{
     struct road{
         //properties...;
         location* leads_to;
-        road():leads_to(nullptr);
+        road():leads_to(nullptr){};
     };
 
     dynamic_array<road> connected_to;
@@ -28,7 +28,7 @@ class location{
 
     void dp(){
         std::cout << "COORDINATES: " << std::endl;
-        std::cout << "X:" << X << "   Y:" << Y << "   Z:" << Z << std::endl;
+        std::cout << "X:" << coordinates[axis::X] << "   Y:" << coordinates[axis::Y] << "   Z:" << coordinates[axis::Z] << std::endl;
     }
 };
 

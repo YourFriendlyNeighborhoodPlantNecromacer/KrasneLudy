@@ -8,6 +8,7 @@ int main(){
     farland.insert(new location);
     farland.insert(new location);
     farland.insert(new location);
+    farland.make_connection(0, 1);
     farland.dp();
 
     return 0;
