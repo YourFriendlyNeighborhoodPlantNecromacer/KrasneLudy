@@ -1,5 +1,4 @@
-/bin
-KrasnoLudki.cbp
-KrasnoLudki.depend
-KrasnoLudki.layout
-/obj
+*.exe
+*.dsym
+main
+/.vscode
