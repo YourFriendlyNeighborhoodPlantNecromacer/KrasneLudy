@@ -26,12 +26,12 @@ cout << "Hello World" << endl;
 
         if(ball_x + ball_radius >= SCREEN_WIDTH || ball_x - ball_radius <= 0)
         {
-            ball_speed_x *= -1;
+            ball_speed_x *= -(rand()%200/100.0);
         }
 
         if(ball_y + ball_radius >= SCREEN_HEIGHT || ball_y - ball_radius <= 0)
         {
-            ball_speed_y *= -2;
+            ball_speed_y *= -(rand()%200/100.0);
         }
         
         BeginDrawing();
