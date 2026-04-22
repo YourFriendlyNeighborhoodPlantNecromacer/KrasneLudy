@@ -1,5 +1,5 @@
-#include <iostream>
 #include <raylib.h>
+//#include "DataStructures/DataStructures.h"
 
 #define FOV_ORTHOGRAPHIC 10.0f
 
@@ -30,6 +30,7 @@ int main () {
         BeginDrawing();
             ClearBackground(RAYWHITE);
 
+            /*
             switch (state)
             {
             case MAIN_MENU:
@@ -46,6 +47,7 @@ int main () {
                 EndMode3D();
                 break;
             }
+            */
 
             DrawFPS(10, 10);
         EndDrawing();

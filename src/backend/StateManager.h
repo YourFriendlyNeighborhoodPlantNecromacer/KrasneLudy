@@ -2,7 +2,19 @@
 #define __STATEMANAGER_H__
 
 class StateManager {
-	public:
+public:
+	bool canInput;
+
+	//Create & Destroy
 	StateManager();
 	~StateManager();
+
+	//State Switching
+	void SwitchState();
+
+	//Update & Drawing
+	void Update();
+	void Draw();
 }
+
+#endif
