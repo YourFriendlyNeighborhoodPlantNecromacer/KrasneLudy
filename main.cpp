@@ -1,5 +1,5 @@
 #include <raylib.h>
-#include "src/backend/GameState.h"
+#include "src/states/Visualization.cpp"
 //#include "src/DataStructures/DataStructures.h"
 
 /*
@@ -13,13 +13,20 @@ int main () {
     const int SCREEN_WIDTH = 800;
     const int SCREEN_HEIGHT = 450;
 
+    Visualization state;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
+    state.Init();
+
     SetTargetFPS(60);
 
     while (WindowShouldClose() == false){
+        float dt = GetFrameTime();
+        state.Update(dt);
+
         BeginDrawing();
             ClearBackground(RAYWHITE);
+            state.Draw();
 
             DrawFPS(10, 10);
         EndDrawing();
