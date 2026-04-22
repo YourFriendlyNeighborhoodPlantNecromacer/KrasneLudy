@@ -14,6 +14,7 @@ int main () {
     int ball_radius = 15;
 
     cout << "Hello World" << endl;
+cout << "Hello World" << endl;
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "My first RAYLIB program!");
     SetTargetFPS(60);
@@ -30,7 +31,7 @@ int main () {
 
         if(ball_y + ball_radius >= SCREEN_HEIGHT || ball_y - ball_radius <= 0)
         {
-            ball_speed_y *= -1;
+            ball_speed_y *= -2;
         }
         
         BeginDrawing();
@@ -40,4 +41,6 @@ int main () {
     }
 
     CloseWindow();
+    
+    return 0;
 }
