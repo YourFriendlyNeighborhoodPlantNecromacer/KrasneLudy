@@ -1,13 +1,13 @@
 #include <src/backend/StateManager.h>
 #include <raylib.h>
 
-class Visualization public StateManager {
+class Visualization : public StateManager {
 	public:
-	StateManager() {
+	Visualization() {
 
 	}
 
-	~StateManager() {
+	~Visualization() {
 
 	}
 
@@ -18,4 +18,4 @@ class Visualization public StateManager {
 	void Draw() {
 
 	}
-}
+};

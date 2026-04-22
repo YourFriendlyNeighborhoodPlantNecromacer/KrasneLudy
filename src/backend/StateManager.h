@@ -15,6 +15,6 @@ public:
 	//Update & Drawing
 	void Update();
 	void Draw();
-}
+};
 
 #endif
