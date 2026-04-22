@@ -27,7 +27,7 @@ dynamic_array<T>::~dynamic_array(){
 }
 
 template <typename T>
-dynamic_array<T> dynamic_array<T>::operator + (const dynamic_array<T> &other) const{
+dynamic_array<T> dynamic_array<T>::operator + (const dynamic_array<T> &other) {
     if(this == &other) return *this;
     int64_t length = max(last_index, other.last_index);
     expand_array_to(array, last_index, length);

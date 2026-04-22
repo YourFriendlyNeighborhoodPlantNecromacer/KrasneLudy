@@ -2,7 +2,7 @@
 #include "GLUGLU/GLUGLU.h"
 #include "DataStructures/DataStructures.h"
 
-int main(){
+int _main(){
     std::cout << "Hello world!" << std::endl;
     country farland;
     farland.insert(new location);

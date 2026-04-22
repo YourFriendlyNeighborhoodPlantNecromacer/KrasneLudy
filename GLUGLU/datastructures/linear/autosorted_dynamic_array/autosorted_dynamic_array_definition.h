@@ -27,7 +27,7 @@ autosorted_dynamic_array<T>::~autosorted_dynamic_array(){
 }
 
 template <typename T>
-autosorted_dynamic_array<T> autosorted_dynamic_array<T>::operator + (const autosorted_dynamic_array<T> &other) const{
+autosorted_dynamic_array<T> autosorted_dynamic_array<T>::operator + (const autosorted_dynamic_array<T> &other) {
     if(this == &other) return *this;
     int64_t length = max(last_index, other.last_index);
     expand_array_to(array, last_index, length);
@@ -146,4 +146,3 @@ int64_t autosorted_dynamic_array<T>::get_last_index(){return last_index;}
 
 
 #endif //__AUTOSORTED_DYNAMIC_ARRAY_DEFFINITION_H__
-

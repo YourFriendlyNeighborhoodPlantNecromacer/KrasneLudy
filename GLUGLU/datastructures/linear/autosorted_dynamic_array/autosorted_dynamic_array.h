@@ -16,7 +16,7 @@ class autosorted_dynamic_array{ /// Requires bug-squashing
 
     autosorted_dynamic_array& operator = (const autosorted_dynamic_array &other);
 
-    autosorted_dynamic_array operator + (const autosorted_dynamic_array &other) const;
+    autosorted_dynamic_array operator + (const autosorted_dynamic_array &other);
     autosorted_dynamic_array operator + (const T &value) const;
     T& operator [] (const int64_t &index);
 
@@ -42,4 +42,3 @@ class autosorted_dynamic_array{ /// Requires bug-squashing
 #include "autosorted_dynamic_array_definition.h"
 
 #endif //__AUTOSORTED_DYNAMIC_ARRAY_H__
-

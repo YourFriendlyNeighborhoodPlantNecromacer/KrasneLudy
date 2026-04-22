@@ -16,7 +16,7 @@ class dynamic_array{ /// Requires standarization and bug-squashing
 
     dynamic_array& operator = (const dynamic_array &other);
 
-    dynamic_array operator + (const dynamic_array &other) const;
+    dynamic_array operator + (const dynamic_array &other);
     dynamic_array operator + (const T &value) const;
     T& operator [] (const int64_t &index);
 
