@@ -10,6 +10,13 @@ AXIS REFERENCE:
 // positive z moves closer
 */
 
+enum GAME_STATE {
+    MAIN_MENU,
+    CREDITS,
+    VISUALIZATION
+};
+static GAME_STATE state = VISUALIZATION;
+
 int main () {
     const int SCREEN_WIDTH = 800;
     const int SCREEN_HEIGHT = 450;
@@ -20,17 +27,25 @@ int main () {
     Camera camera = { { 0.0f, 10.0f, 10.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, FOV_ORTHOGRAPHIC, CAMERA_ORTHOGRAPHIC };
 
     while (WindowShouldClose() == false){
-
         BeginDrawing();
             ClearBackground(RAYWHITE);
 
-            BeginMode3D(camera);
+            switch (state)
+            {
+            case MAIN_MENU:
+                break;
+            case CREDITS:
+                break;
+            case VISUALIZATION:
+                BeginMode3D(camera);
 
-                DrawCube((Vector3){-4.0f, 0.0f, 2.0f}, 2.0f, 5.0f, 2.0f, RED);
+                    DrawCube((Vector3){-4.0f, 0.0f, 2.0f}, 2.0f, 5.0f, 2.0f, RED);
 
-                DrawGrid(10, 1.0f);
+                    DrawGrid(10, 1.0f);
 
-            EndMode3D();
+                EndMode3D();
+                break;
+            }
 
             DrawFPS(10, 10);
         EndDrawing();
