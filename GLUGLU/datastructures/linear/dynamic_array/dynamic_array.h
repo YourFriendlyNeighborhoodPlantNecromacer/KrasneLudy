@@ -1,6 +1,6 @@
 #ifndef __DYNAMIC_ARRAY_H__
 #define __DYNAMIC_ARRAY_H__
-
+#include <inttypes.h>
 template <typename T>
 class dynamic_array{ /// Requires standarization and bug-squashing
     private:
@@ -38,6 +38,7 @@ class dynamic_array{ /// Requires standarization and bug-squashing
 
     void sort_asc();
     void sort_dsc();
+    void reverse_order();
 
     T& at(int64_t index);
     T& front();

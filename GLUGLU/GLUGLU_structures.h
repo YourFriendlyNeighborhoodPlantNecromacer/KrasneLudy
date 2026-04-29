@@ -6,7 +6,6 @@
 #include "datastructures/structures/indexed_node/indexed_node.h"
 #include "datastructures/linear/queues/queue/queue.h"
 #include "datastructures/linear/stacks/stack/stack.h"
-#include "datastructures/linear/stacks/l_stack/l_stack.h"
 #include "datastructures/linear/dynamic_array/dynamic_array.h"
 #include "datastructures/linear/autosorted_dynamic_array/autosorted_dynamic_array.h"
 

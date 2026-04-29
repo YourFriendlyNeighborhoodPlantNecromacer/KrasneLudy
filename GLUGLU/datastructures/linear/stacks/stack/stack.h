@@ -1,38 +1,21 @@
 #ifndef __STACK_H__
 #define __STACK_H__
-#include "iostream"
 
+/* WYMAGA NAPRAWY, NIE WIEM CO TU SIĘ STAŁO
 template <typename T>
 class stack{
     private:
-    struct node{
-        T val;
-        node* under;
-
-        node();
-        node(T val);
-        node(T val, node* under);
-
-        ~node();
-
-        node operator + (node &other);
-        node operator - (node &other);
-        node operator / (node &other);
-        node operator * (node &other);
-    };
-    node* top;
+    T length;
 
     public:
     stack();
-    ~stack();
 
-    bool is_empty();
-    node* get_top();
+    int64_t get_length();
     void append(T val);
     bool pop();
     void dp();
 };
 
 #include "stack_definition.h"
-
-#endif //____STACK_H__
+*/
+#endif//__STACK_H__

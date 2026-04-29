@@ -110,7 +110,7 @@ queue<T>& queue<T>::operator = (const queue &other){
 }
 
 template <typename T>
-queue<T> queue<T>::operator + (const queue &other) const{
+queue<T> queue<T>::operator + (const queue &other) const {
     node* this_node_ptr = this->head;
     node* other_node_ptr = other.head;
     queue<T> new_queue;
@@ -123,7 +123,7 @@ queue<T> queue<T>::operator + (const queue &other) const{
 }
 
 template <typename T>
-queue<T> queue<T>::operator - (const queue &other) const{
+queue<T> queue<T>::operator - (const queue &other) const {
     node* this_node_ptr = this->head;
     node* other_node_ptr = other.head;
     queue<T> new_queue;

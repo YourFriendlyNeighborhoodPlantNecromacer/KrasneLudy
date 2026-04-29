@@ -1,6 +1,9 @@
 #ifndef __LOCATIONS_H__
 #define __LOCATIONS_H__
 
+#include "../GLUGLU/datastructures/linear/dynamic_array/dynamic_array.h"
+#include "road.h"
+
 class location{
     public:
     enum axis{
@@ -14,30 +17,27 @@ class location{
         house = 1,
         workplace = 2
     };
-
-    struct road{
-        //properties...;
-        location* leads_to;
-        road():leads_to(nullptr){};
-    };
-
-    dynamic_array<road> connected_to;
+    int64_t index;
+    dynamic_array<road*> connected_to;
     building_type type;
-    double coordinates[3]; ///X Y ELEVATION
-    //autosorted_dynamic_array<location> a;
+    double coordinates[3]; ///X Y Z
 
-    void dp(){
-        std::cout << "COORDINATES: " << std::endl;
-        std::cout << "X:" << coordinates[axis::X] << "   Y:" << coordinates[axis::Y] << "   Z:" << coordinates[axis::Z] << std::endl;
-    }
+    location(int64_t index);
+    location(int64_t index, double X, double Y, double Z);
+
+    void add_road_to(location* road_destination, int64_t maximum_capacity);
+    int64_t get_amount_of_roads();
+    bool is_connected_to(int64_t index);
+    void randomise_location();
+    void set_location(double new_x, double new_y, double new_z = 0);
+
+    void dp(int64_t tabulation = 0);
 };
 
-std::ostream& operator << (std::ostream &os, const location structure){
-    os << "Can i get number fifteennn";
-    return os;
-}
 
 #endif//__LOCATIONS_H__
 
-
+// Algorithms by Dasgupta et al would be easier to read
+// Algorithm Design by Kleinberg and Tardos is another popular favorite |||
+// A* search
 // 29 kwietnia (45)
