@@ -2,6 +2,7 @@
 #define __COUNTRY_H__
 
 #include "location.h"
+#include "../GLUGLU/datastructures/linear/dynamic_array/dynamic_array.h"
 
 class country{
     private:
@@ -29,9 +30,13 @@ class country{
 
     void dp(int64_t tabulation = 0);
 
+    dynamic_array<int64_t>* create_boarder();
+
     private:
     int64_t rec_dfs(int64_t current_node, int64_t to, int64_t depth, bool* visited);
-
+    int64_t find_lowest_point_for_rim();
+    dynamic_array<int64_t>* polar_compare_for_rim(dynamic_array<int64_t>* array_of_points);
 };
+
 
 #endif//__COUNTRY_H__

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "country.h"
+#include "location.h"
 #include "../GLUGLU/functions/new_line.h"
 #include "../GLUGLU/functions/tabulator.h"
 #include "../GLUGLU/datastructures/linear/queues/queue/queue.h"
@@ -10,15 +11,15 @@ country::country() : locations(){}
 
 country::country(int64_t size) : locations(size){}
 
-country::country(const country& other) : locations(other.locations){}
+country::country(const country&) = delete;
 
-country::~country(){}
-
-country& country::operator = (const country& other){
-    if(this==&other) return *this;
-    this->locations = other.locations;
-    return *this;
+country::~country(){
+    for(int64_t i = 0; i <= locations.get_last_index(); i++){
+        delete locations[i];
+    }
 }
+
+country& country::operator=(const country&) = delete;
 
 bool country::is_empty(){
     return locations.is_empty();
@@ -41,12 +42,12 @@ int64_t country::get_last_index(){
 }
 
 bool country::edge_exists(int64_t from, int64_t to){
-    if(from < 0 || to < 0 || from > locations.get_last_index() || from > locations.get_last_index()) return false;
+    if(from < 0 || to < 0 || from > locations.get_last_index() || to > locations.get_last_index()) return false;
     return locations[from]->is_connected_to(to);
 }
 
 bool country::make_connection(int64_t from, int64_t to, int64_t maximum_flow){
-    if(from < 0 || to < 0 || from > locations.get_last_index() || from > locations.get_last_index()) return false;
+    if(from < 0 || to < 0 || from > locations.get_last_index() || to > locations.get_last_index()) return false;
     locations[from]->add_road_to(locations[to], maximum_flow);
     return true;
 }
@@ -69,7 +70,7 @@ dynamic_array<int64_t>* country::find_path(int64_t from, int64_t to){
         inspected_location_index = to_visit.get_head()->val;
         if(visited[inspected_location_index]) continue;
         visited[inspected_location_index] = true;
-        for(int i=0; i<=locations[inspected_location_index]->get_amount_of_roads(); i++){
+        for(int i=0; i<locations[inspected_location_index]->get_amount_of_roads(); i++){
             grey_node = locations[inspected_location_index]->connected_to[i]->get_destination()->index;
             if(visited[grey_node]) continue;
             previous_node[grey_node] = inspected_location_index;
@@ -80,26 +81,34 @@ dynamic_array<int64_t>* country::find_path(int64_t from, int64_t to){
                     shortest_path_array->append(indexed_node);
                     indexed_node = previous_node[indexed_node];
                 }
+                shortest_path_array->append(from);
                 shortest_path_array->reverse_order();
+                delete[] previous_node;
+                delete[] visited;
                 return shortest_path_array;
             }
             to_visit.append(grey_node);
         }
         to_visit.dequeue();
     }
+    delete[] visited;
+    delete[] previous_node;
     return nullptr;
 }
 
 int64_t country::bfs(int64_t from, int64_t to){
     if(from == to) return true;
-    bool* visited = new bool[locations.get_last_index()]{};
+    bool* visited = new bool[locations.get_last_index()+1]{};
     queue<int64_t> to_visit;
     to_visit.append(from);
     int64_t inspected_location_index;
     int64_t grey_node;
     while(!to_visit.is_empty()){
         inspected_location_index = to_visit.get_head()->val;
-        if(visited[inspected_location_index]) continue;
+        if(visited[inspected_location_index]){
+            to_visit.dequeue();
+            continue;
+        }
 
         visited[inspected_location_index] = true;
         for(int i=0; i<locations[inspected_location_index]->get_amount_of_roads(); i++){
@@ -145,6 +154,33 @@ bool country::construct_from_file(const std::string &file_name){
     return true;
 }
 
+int64_t country::find_lowest_point_for_rim(){
+    int64_t lowest_left_vertex_index = 0;
+    for(int i = 0; i<=locations.get_last_index(); i++){
+        if(locations[lowest_left_vertex_index]->coordinates[location::axis::Y] > locations[i]->coordinates[location::axis::Y]) lowest_left_vertex_index = i;
+        if(locations[lowest_left_vertex_index]->coordinates[location::axis::Y] > locations[i]->coordinates[location::axis::Y] && locations[lowest_left_vertex_index]->coordinates[location::axis::X] > locations[i]->coordinates[location::axis::X]) lowest_left_vertex_index = i;
+    }
+    return lowest_left_vertex_index;
+}
+
+double det(location* p0, location* pi, location* pj){
+    return (pi->coordinates[location::axis::X] - p0->coordinates[location::axis::X]) * (pj->coordinates[location::axis::Y] - p0->coordinates[location::axis::Y]) - (pj->coordinates[location::axis::X] - p0->coordinates[location::axis::X]) * (pi->coordinates[location::axis::Y] - p0->coordinates[location::axis::Y]);
+}
+
+dynamic_array<int64_t>* country::polar_compare_for_rim(dynamic_array<int64_t>* array_of_points){
+    int64_t p0 = 0;
+
+    double angular_coordinate;
+    dynamic_array<double> array_of_assinged_angular_values;
+
+    for(int64_t pi = 1; pi <= locations.get_last_index(); pi++){
+         array_of_assinged_angular_values.at(pi) = locations[array_of_points->at(pi)]->coordinates[location::axis::X] / locations[array_of_points->at(pi)]->coordinates[location::axis::Y];
+    }
+
+
+
+    return nullptr;
+}
 
 void country::dp(int64_t tabulation){
     tab(tabulation);

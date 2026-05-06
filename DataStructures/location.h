@@ -24,6 +24,7 @@ class location{
 
     location(int64_t index);
     location(int64_t index, double X, double Y, double Z);
+    ~location();
 
     void add_road_to(location* road_destination, int64_t maximum_capacity);
     int64_t get_amount_of_roads();
@@ -34,6 +35,7 @@ class location{
     void dp(int64_t tabulation = 0);
 };
 
+double distance(location* p1, location* p2);
 
 #endif//__LOCATIONS_H__
 

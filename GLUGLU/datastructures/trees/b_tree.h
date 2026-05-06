@@ -19,7 +19,8 @@ class b_tree{
     node* get_root();
     node* find(char value);
     node* find(dynamic_array<bool> directions);
-    void insert(char value, dynamic_array<bool> directions);
+    void insert(char value);
+    void construct_from_dictionary(dynamic_array<int64_t> dictionary);
     bool remove();
 
 };
@@ -30,8 +31,9 @@ class b_tree{
 
 /*
 Ananas-Banan
-90
+90           (
                 .
+              /
 
       .
      / \

@@ -8,7 +8,14 @@ template <typename T>
 typename b_tree<T>::node* b_tree<T>::get_root(){return root;}
 
 template <typename T>
-void insert(char value, dynamic_array<bool> directions){
+void insert(char value){
 
 }
+
+template <typename T>
+void b_tree<T>::construct_from_dictionary(dynamic_array<int64_t> dictionary){
+    for(int i=0; i<=dictionary.get_last_index(); i++) insert(dictionary[i]);
+}
+
+
 #endif //__B_TREE_DEFINITION_H__
