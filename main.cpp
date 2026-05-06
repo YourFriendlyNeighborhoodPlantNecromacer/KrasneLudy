@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include "src/backend/StateManager.h"
 #include "src/states/Visualization.cpp"
 //#include "src/DataStructures/DataStructures.h"
 
@@ -13,20 +14,22 @@ int main () {
     const int SCREEN_WIDTH = 800;
     const int SCREEN_HEIGHT = 450;
 
-    Visualization state;
-
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
-    state.Init();
+
+    // Set the initial state
+    StateManager::Instance().ChangeState(new Visualization());
 
     SetTargetFPS(60);
 
     while (WindowShouldClose() == false){
+        StateManager::Instance().ProcessStateChange();
+
         float dt = GetFrameTime();
-        state.Update(dt);
+        StateManager::Instance().Update(dt);
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            state.Draw();
+            StateManager::Instance().Draw();
 
             DrawFPS(10, 10);
         EndDrawing();

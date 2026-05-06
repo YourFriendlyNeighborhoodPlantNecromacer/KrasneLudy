@@ -4,13 +4,13 @@
 
 class GameState {
 public:
-	//Destroy
+	// Usuwanie
 	virtual ~GameState() {};
 
-	//Creation
+	// Tworzenie tuż po tworzeniu state-a
 	virtual void Init() = 0;
 
-	//Update & Drawing
+	// Aktualizacja (głównie do logiki) i rysowanie (osobno)
 	virtual void Update(float dt) = 0;
 	virtual void Draw() = 0;
 };
