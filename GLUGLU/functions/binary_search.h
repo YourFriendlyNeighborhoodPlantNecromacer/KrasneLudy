@@ -1,6 +1,7 @@
 #ifndef __BINARY_SEARCH_H__
 #define __BINARY_SEARCH_H__
 #include <iostream>
+#include <inttypes.h>
 
 template<typename T>
 class autosorted_dynamic_array;
@@ -38,6 +39,7 @@ int64_t binary_search(arr data, int64_t left_index, int64_t right_index, value s
         left_index = middle + 1;
     }
     return -1;
+    }
 }
 
 #endif//__BINARY_SEARCH_H__
