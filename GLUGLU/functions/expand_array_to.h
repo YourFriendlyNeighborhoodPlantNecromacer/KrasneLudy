@@ -7,7 +7,7 @@ bool expand_array_to(T*& array, int64_t& capacity, int aimed_capacity){
     T* new_array = new T[aimed_capacity];
     int64_t i;
     for(i = 0; i<capacity; i++) new_array[i] = array[i];
-    for(i; i<aimed_capacity; i++) new_array[i] = T();
+    for(; i<aimed_capacity; i++) new_array[i] = T();
     capacity = aimed_capacity;
     delete[] array;
     array = new_array;

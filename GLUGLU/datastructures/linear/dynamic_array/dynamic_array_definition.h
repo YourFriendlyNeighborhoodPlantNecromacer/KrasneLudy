@@ -1,6 +1,7 @@
 #ifndef __DYNAMIC_ARRAY_DEFFINITION_H__
 #define __DYNAMIC_ARRAY_DEFFINITION_H__
 #include <iostream>
+#include <stdexcept>
 #include "../../../functions/expand_array.h"
 #include "../../../functions/max.h"
 #include "../../../functions/tabulator.h"
@@ -33,7 +34,7 @@ template <typename T>
 dynamic_array<T> dynamic_array<T>::operator + (const dynamic_array<T> &other) {
     if(this == &other) return *this;
     int64_t length = max(last_index, other.last_index);
-    expand_array_to(array, last_index, length);
+    expand_array_to(array, last_index+1, length);
     last_index = length;
     size = length;
 
@@ -73,6 +74,15 @@ T& dynamic_array<T>::at(int64_t index){
         throw std::out_of_range("Index out of bounds");
     }
     return array[index];
+}
+
+template <typename T>
+bool dynamic_array<T>::swap(int64_t index_a, int64_t index_b){
+    if(index_a < 0 || index_a > last_index || index_b < 0 || index_b > last_index) return false;
+    T temp = array[index_a];
+    array[index_a] = array[index_b];
+    array[index_b] = temp;
+    return true;
 }
 
 template <typename T>
@@ -158,9 +168,9 @@ void dynamic_array<T>::force_shrink(int64_t new_size){
 template <typename T>
 void dynamic_array<T>::clear(){
     if(array)delete[] array;
-    array=nullptr;
     size = 1;
     last_index = -1;
+    array = new T[size];
 }
 
 template <typename T>

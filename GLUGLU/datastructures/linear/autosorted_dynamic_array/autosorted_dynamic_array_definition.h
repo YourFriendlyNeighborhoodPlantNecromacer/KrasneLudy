@@ -79,7 +79,7 @@ bool autosorted_dynamic_array<T>::insert(T val){
     int64_t right_index = last_index;
     while(left_index <= right_index){
         index = (left_index + right_index)/2;
-        if(val <= array[index+1] && val >= array[index-1]) break;
+        if(array[index] == val) break;
         if(val > array[index]){
             right_index = index - 1;
             continue;
@@ -129,9 +129,9 @@ void autosorted_dynamic_array<T>::shrink_to_fit(){
 template <typename T>
 void autosorted_dynamic_array<T>::clear(){
     if(array)delete[] array;
-    array=nullptr;
     size = 1;
     last_index = 0;
+    array = new T[size];
 }
 
 template <typename T>

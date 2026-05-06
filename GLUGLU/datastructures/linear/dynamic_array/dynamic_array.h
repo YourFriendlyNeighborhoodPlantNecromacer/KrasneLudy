@@ -36,9 +36,10 @@ class dynamic_array{ /// Requires standarization and bug-squashing
     void force_shrink(int64_t new_size);
     void clear();
 
+    bool swap(int64_t index_a, int64_t index_b);
+    void reverse_order();
     void sort_asc();
     void sort_dsc();
-    void reverse_order();
 
     T& at(int64_t index);
     T& front();

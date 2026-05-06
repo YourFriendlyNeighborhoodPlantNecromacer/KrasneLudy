@@ -7,7 +7,7 @@ void expand_martix(T**& matrix, int64_t& size){
     for(int64_t i=0; i<size*2; i++) new_matrix[i] = new T[size*2]();
 
     for(int64_t i = 0; i<size; i++){
-        for(int64_t j = 0; i<size; i++){
+        for(int64_t j = 0; j<size; j++){
             new_matrix[i][j] = matrix[i][j];
         }
     }
