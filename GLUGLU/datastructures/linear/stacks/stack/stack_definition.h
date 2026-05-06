@@ -1,5 +1,5 @@
-#ifndef __STACK_DEFFINITION_H__
-#define __STACK_DEFFINITION_H__
+#ifndef __STACK_DEFINITION_H__
+#define __STACK_DEFINITION_H__
 #include <iostream>
 #include "../../../../functions/tabulator.h"
 

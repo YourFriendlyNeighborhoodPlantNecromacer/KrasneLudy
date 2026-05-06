@@ -1,5 +1,5 @@
-#ifndef __QUEUE_DEFFINITION_H__
-#define __QUEUE_DEFFINITION_H__
+#ifndef __QUEUE_DEFINITION_H__
+#define __QUEUE_DEFINITION_H__
 //TO DO: Implement Smart pointers
 //       Overload commented out operators
 

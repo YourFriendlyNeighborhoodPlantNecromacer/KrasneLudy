@@ -1,5 +1,5 @@
-#ifndef __DYNAMIC_ARRAY_DEFFINITION_H__
-#define __DYNAMIC_ARRAY_DEFFINITION_H__
+#ifndef __DYNAMIC_ARRAY_DEFINITION_H__
+#define __DYNAMIC_ARRAY_DEFINITION_H__
 #include <iostream>
 #include <stdexcept>
 #include "../../../functions/expand_array.h"
