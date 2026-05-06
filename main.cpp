@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include "src/backend/StateManager.h"
-#include "src/states/Visualization.cpp"
+#include "src/states/Title.cpp"
+#include "src/Constants.h"
 //#include "src/DataStructures/DataStructures.h"
 
 /*
@@ -11,13 +12,9 @@ AXIS REFERENCE:
 */
 
 int main () {
-    const int SCREEN_WIDTH = 800;
-    const int SCREEN_HEIGHT = 450;
+    InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
 
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
-
-    // Set the initial state
-    StateManager::Instance().ChangeState(new Visualization());
+    StateManager::Instance().ChangeState(new Title());
 
     SetTargetFPS(60);
 
