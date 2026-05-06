@@ -2,7 +2,7 @@
 #define __L_STACK_H__
 
 template <typename T>
-class l_stack : public stack<T>{
+class l_stack{
     private:
     T length;
 

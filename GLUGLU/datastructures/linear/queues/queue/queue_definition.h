@@ -22,7 +22,6 @@ queue<T>::node::node(const node &other){
     ahead = nullptr;
 }
 
-
 template <typename T>
 typename queue<T>::node& queue<T>::node::operator = (const node &other){
     if(this==&other) return *this;

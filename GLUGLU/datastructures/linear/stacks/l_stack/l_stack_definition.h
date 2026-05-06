@@ -1,5 +1,5 @@
-#ifndef __STACK_DEFFINITION_H__
-#define __STACK_DEFFINITION_H__
+#ifndef __L_STACK_DEFFINITION_H__
+#define __L_STACK_DEFFINITION_H__
 /*
 template <typename T>
 stack<T>::stack() : length(0){}
