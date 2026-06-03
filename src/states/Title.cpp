@@ -69,7 +69,7 @@ class Title : public GameState {
 
 		// Rysowanie ramki wyboru
 		Rectangle r = (selectedItem == 0) ? btnVis : (selectedItem == 1 ? btnCredits : btnExit);
-		DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, GOLD);
+		DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, Color{(96),(96),(0),(255)});
 
 		DrawTexture(umk_logo, 5, Config::SCREEN_HEIGHT - umk_logo.height - 5, WHITE);
 

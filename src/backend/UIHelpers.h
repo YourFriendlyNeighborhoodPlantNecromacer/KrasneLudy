@@ -35,9 +35,9 @@ namespace UI {
         }
     }
 
-    inline void DrawMenuButton(Rectangle rec, const char* text, Font font) {
+    inline void DrawMenuButton(Rectangle rec, const char* text, Font font, Color hoverColor = DARKGRAY, Color regularColor = GRAY) {
         bool hover = CheckCollisionPointRec(GetMousePosition(), rec);
-        DrawRectangleRec(rec, hover ? DARKGRAY : GRAY);
+        DrawRectangleRec(rec, hover ? hoverColor : regularColor);
         DrawRectangleLinesEx(rec, 2, BLACK);
         Vector2 textSize = MeasureTextEx(font, text, 20, 2);
         DrawTextEx(font, text, { rec.x + (rec.width - textSize.x) / 2, rec.y + 10 }, 20, 2, WHITE);

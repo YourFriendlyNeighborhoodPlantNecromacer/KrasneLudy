@@ -10,6 +10,13 @@ class Visualization : public GameState {
 	Texture2D marble_bg;
 	Rectangle viewportArea;
 	Camera2D camera;
+	Font customFont;
+
+	Rectangle btnBack = { 0 };
+	Rectangle btnLoad = { 0 };
+
+	int selectedItem = 0;
+	int lastSelectedItem = 0;
 
 	void Init() override {
 		marble_bg = LoadTexture(UI::AssetPath("images/ui/marble.png"));
@@ -29,6 +36,11 @@ class Visualization : public GameState {
 		camera.offset = { viewportArea.x + viewportArea.width / 2.0f, viewportArea.y + viewportArea.height / 2.0f };
 		camera.rotation = 0.0f;
 		camera.zoom = 1.0f;
+
+		btnBack = { viewportArea.x, viewportArea.y + viewportArea.height + 20.0f, 200, 40};
+		btnLoad = { viewportArea.x, btnBack.y + btnBack.height + 10.0f, 200, 40};
+
+		customFont = UI::LoadStandardFont(40);
 	}
 
 	void Update(float dt) override {
@@ -72,6 +84,24 @@ class Visualization : public GameState {
 				camera.target.y -= delta.y / camera.zoom;
 			}
 		}
+
+		// Button Controls
+		Vector2 mouse = GetMousePosition();
+		if (CheckCollisionPointRec(mouse, btnBack)) selectedItem = 0;
+		else if (CheckCollisionPointRec(mouse, btnLoad)) selectedItem = 1;
+
+		if (CheckCollisionPointRec(mouse, btnBack) || CheckCollisionPointRec(mouse, btnLoad)) {
+			SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+		} else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+			if (CheckCollisionPointRec(mouse, btnBack)) {
+				UI::PlaySelectSound();
+				StateManager::Instance().ChangeState(new Title());
+			} else if (CheckCollisionPointRec(mouse, btnLoad)) {
+				UI::PlaySelectSound();
+			}
+		}
 	}
 
 	void Draw() override {
@@ -94,6 +124,12 @@ class Visualization : public GameState {
 
 			EndMode2D();
 		EndScissorMode();
+
+		UI::DrawMenuButton(btnBack, "WYJDŹ", customFont, Color{(148),(0),(0),(255)}, Color{(196),(0),(0),(255)});
+		UI::DrawMenuButton(btnLoad, "ŁADUJ GRAF", customFont);
+
+		Rectangle r = (selectedItem == 0) ? btnBack : btnLoad;
+		DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, Color{(96),(96),(0),(255)});
 
 		DrawRectangleLinesEx(viewportArea, 3, RAYWHITE);
 	}
