@@ -2,3 +2,7 @@
 *.dsym
 main
 /.vscode
+/GLUGLU/functions/tests/*.txt
+/GLUGLU/functions/tests/*.bin
+/GLUGLU/functions/tests/*.o
+/GLUGLU/functions/tests/*.exe
