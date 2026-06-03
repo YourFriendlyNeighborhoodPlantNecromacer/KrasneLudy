@@ -32,9 +32,24 @@ class Visualization : public GameState {
 	}
 
 	void Update(float dt) override {
-		if (IsKeyPressed(KEY_ESCAPE)) {
+		if (IsKeyReleased(KEY_ESCAPE)) {
 			StateManager::Instance().ChangeState(new Title());
 		}
+
+		// Przesuwanie
+		float panSpeed = 600.0f * dt / camera.zoom;
+		if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    camera.target.y -= panSpeed;
+		if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  camera.target.y += panSpeed;
+		if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  camera.target.x -= panSpeed;
+		if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) camera.target.x += panSpeed;
+
+		// Powiększanie
+		float keyboardZoomSpeed = 2.0f * dt;
+		if (IsKeyDown(KEY_KP_ADD) || IsKeyDown(KEY_EQUAL)) camera.zoom += keyboardZoomSpeed;
+		if (IsKeyDown(KEY_KP_SUBTRACT) || IsKeyDown(KEY_MINUS)) camera.zoom -= keyboardZoomSpeed;
+
+		if (camera.zoom < 0.1f) camera.zoom = 0.1f;
+		if (camera.zoom > 10.0f) camera.zoom = 10.0f;
 
 		// Logika kamery
 		if (CheckCollisionPointRec(GetMousePosition(), viewportArea)) {

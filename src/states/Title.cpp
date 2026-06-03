@@ -19,6 +19,7 @@ class Title : public GameState {
 
 	float introTimer = 0.0f;
 	const float fadeDuration = 2.0f; // Sekundy przejścia
+	int selectedItem = 0;
 
 	// Prostokąty przycisków
 	Rectangle btnVis = { 0 };
@@ -63,6 +64,10 @@ class Title : public GameState {
 		UI::DrawMenuButton(btnCredits, "TWÓRCY", customFont);
 		UI::DrawMenuButton(btnExit, "WYJŚCIE", customFont);
 
+		// Rysowanie ramki wyboru
+		Rectangle r = (selectedItem == 0) ? btnVis : (selectedItem == 1 ? btnCredits : btnExit);
+		DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, GOLD);
+
 		DrawTexture(umk_logo, 5, Config::SCREEN_HEIGHT - umk_logo.height - 5, WHITE);
 	}
 
@@ -82,16 +87,28 @@ class Title : public GameState {
 void Title::Update(float dt) {
 	introTimer += dt;
 
-	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-		Vector2 mouse = GetMousePosition();
-		if (CheckCollisionPointRec(mouse, btnVis)) {
+	// Sterowanie klawiaturą - nawigacja
+	if (IsKeyPressed(KEY_UP)) selectedItem = (selectedItem + 2) % 3;
+	if (IsKeyPressed(KEY_DOWN)) selectedItem = (selectedItem + 1) % 3;
+
+	// Obsługa myszy (synchronizacja wyboru z najechniem kursora)
+	Vector2 mouse = GetMousePosition();
+	if (CheckCollisionPointRec(mouse, btnVis)) selectedItem = 0;
+	else if (CheckCollisionPointRec(mouse, btnCredits)) selectedItem = 1;
+	else if (CheckCollisionPointRec(mouse, btnExit)) selectedItem = 2;
+
+	// Potwierdzenie wyboru
+	if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+		if (selectedItem == 0) {
 			StateManager::Instance().ChangeState(new Visualization());
 		}
-		else if (CheckCollisionPointRec(mouse, btnCredits)) {
+		else if (selectedItem == 1) {
 			StateManager::Instance().ChangeState(new Credits());
 		}
-		else if (CheckCollisionPointRec(mouse, btnExit)) {
+		else if (selectedItem == 2) {
 			exit(0);
 		}
 	}
+
+	if (IsKeyPressed(KEY_ESCAPE)) exit(0);
 }

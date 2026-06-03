@@ -26,8 +26,8 @@ class Credits : public GameState {
 			}
 		}
 
-		// Wyjść też można przez ESC
-		if (IsKeyPressed(KEY_ESCAPE)) {
+		// Powrót do menu (używamy Released, aby uniknąć "przebicia" klawisza do stanu Title)
+		if (IsKeyReleased(KEY_ESCAPE)) {
 			StateManager::Instance().ChangeState(new Title());
 		}
 	}
