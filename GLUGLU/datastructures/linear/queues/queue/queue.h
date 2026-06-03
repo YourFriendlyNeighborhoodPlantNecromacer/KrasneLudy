@@ -48,7 +48,7 @@ class queue{
     bool is_empty();
     node* get_head();
     node* get_rear();
-    T& at();
+    T& at(int64_t index);
     int64_t get_lenght();
     void append(T val);
     void append(node* val);
@@ -56,6 +56,7 @@ class queue{
     void merge_with(const queue& other);
     void dp(int64_t tabulation = 0);
 };
+
 
 #include "queue_definition.h"
 #endif // __COUPLE_H__

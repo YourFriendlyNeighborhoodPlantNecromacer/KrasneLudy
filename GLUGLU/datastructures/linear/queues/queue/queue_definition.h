@@ -1,7 +1,8 @@
 #ifndef __QUEUE_DEFINITION_H__
 #define __QUEUE_DEFINITION_H__
-//TO DO: Implement Smart pointers
-//       Overload commented out operators
+#include <iostream>
+#include <inttypes.h>
+#include "../../../../functions/new_line.h"
 
 ///NODE
 template <typename T>
@@ -220,6 +221,16 @@ typename queue<T>::node* queue<T>::get_head(){return head;}
 
 template <typename T>
 typename queue<T>::node* queue<T>::get_rear(){return rear;}
+
+template <typename T>
+T& queue<T>::at(int64_t index){
+    if(index > length) throw std::out_of_range("INDEX OUT OF RANGE");
+    node* v = head;
+    for(int i=0; i<index; i++){
+        v = v->ahead;
+    }
+    return v->val;
+}
 
 template <typename T>
 void queue<T>::append(T val){

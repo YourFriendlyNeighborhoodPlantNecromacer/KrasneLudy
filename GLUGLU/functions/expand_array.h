@@ -1,10 +1,21 @@
 #ifndef __EXPAND_ARRAY_H__
 #define __EXPAND_ARRAY_H__
 
+#include <utility>
+
 template <typename T>
 void expand_array(T*& array, int64_t& capacity){
     T* new_array = new T[capacity*2];
-    for(int64_t i = 0; i<capacity; i++) new_array[i] = array[i];
+    for(int64_t i = 0; i<capacity; i++) new_array[i] = std::move(array[i]);
+    capacity *= 2;
+    delete[] array;
+    array = new_array;
+}
+
+template <typename T>
+void expand_array(T*&& array, int64_t& capacity){
+    T* new_array = new T[capacity*2];
+    for(int64_t i = 0; i<capacity; i++) new_array[i] = std::move(array[i]);
     capacity *= 2;
     delete[] array;
     array = new_array;

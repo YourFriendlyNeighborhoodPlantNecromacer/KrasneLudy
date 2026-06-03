@@ -2,7 +2,7 @@
 #define __MAX_H__
 template <typename T>
 T max(T a, T b){
-    return (a<=b ? a : b);
+    return (a>=b ? a : b);
 }
 
 template <typename T>
