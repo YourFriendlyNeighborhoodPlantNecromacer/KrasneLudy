@@ -5,6 +5,7 @@
 
 int main () {
     InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
+    SetExitKey(KEY_NULL); // Wyłączamy domyślne zamykanie na ESC, aby móc go używać do nawigacji
 
     StateManager::Instance().ChangeState(new Title());
 
