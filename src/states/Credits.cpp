@@ -11,7 +11,7 @@ class Credits : public GameState {
 	Font customFont;
 
 	void Init() override {
-		marble_bg = LoadTexture("images/ui/marble.png");
+		marble_bg = LoadTexture(UI::AssetPath("images/ui/marble.png"));
 
 		customFont = UI::LoadStandardFont(40);
 
@@ -20,14 +20,22 @@ class Credits : public GameState {
 	}
 
 	void Update(float dt) override {
+		Vector2 mouse = GetMousePosition();
+
+		if (CheckCollisionPointRec(mouse, btnBack)) {
+			SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+		} else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
 		if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-			if (CheckCollisionPointRec(GetMousePosition(), btnBack)) {
+			if (CheckCollisionPointRec(mouse, btnBack)) {
+				UI::PlaySelectSound();
 				StateManager::Instance().ChangeState(new Title());
 			}
 		}
 
-		// Powrót do menu (używamy Released, aby uniknąć "przebicia" klawisza do stanu Title)
+		// Powrót do menu
 		if (IsKeyReleased(KEY_ESCAPE)) {
+			UI::PlaySelectSound();
 			StateManager::Instance().ChangeState(new Title());
 		}
 	}
@@ -53,6 +61,11 @@ class Credits : public GameState {
 			Vector2 nameSize = MeasureTextEx(customFont, names[i], 30, 2);
 			DrawTextEx(customFont, names[i], { (Config::SCREEN_WIDTH - nameSize.x) / 2, (float)posY }, 30, 2, BLACK);
 		}
+
+		// Atrybucja Audio (CC0)
+		const char* audioCredits = "AUDIO: Freesound.org";
+		Vector2 audioSize = MeasureTextEx(customFont, audioCredits, 15, 1);
+		DrawTextEx(customFont, audioCredits, { (Config::SCREEN_WIDTH - audioSize.x) / 2, Config::SCREEN_HEIGHT - 40.0f }, 15, 1, DARKGRAY);
 
 		// Rysowanie przycisku wyjścia
 		bool hover = CheckCollisionPointRec(GetMousePosition(), btnBack);

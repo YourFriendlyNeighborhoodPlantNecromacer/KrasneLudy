@@ -12,7 +12,7 @@ class Visualization : public GameState {
 	Camera2D camera;
 
 	void Init() override {
-		marble_bg = LoadTexture("images/ui/marble.png");
+		marble_bg = LoadTexture(UI::AssetPath("images/ui/marble.png"));
 
 		float padding = 40.0f;
 		float bottomSpace = 140.0f; // Miejsce na przyciski i rezultaty i takie tam
@@ -33,6 +33,7 @@ class Visualization : public GameState {
 
 	void Update(float dt) override {
 		if (IsKeyReleased(KEY_ESCAPE)) {
+			UI::PlaySelectSound();
 			StateManager::Instance().ChangeState(new Title());
 		}
 
