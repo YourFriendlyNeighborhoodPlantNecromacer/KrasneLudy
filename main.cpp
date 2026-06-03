@@ -27,7 +27,7 @@ int main () {
         StateManager::Instance().Update(dt);
 
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(BLACK);
             StateManager::Instance().Draw();
         EndDrawing();
     }

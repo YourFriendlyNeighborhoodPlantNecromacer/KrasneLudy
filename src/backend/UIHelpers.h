@@ -16,7 +16,7 @@ namespace UI {
     void PlaySelectSound();
 
     inline const char* AssetPath(const char* subPath) {
-        return TextFormat("assets/%s", subPath);
+        return TextFormat("%s/%s", Config::ASSET_PATH.c_str(), subPath);
     }
 
     inline Font LoadStandardFont(int fontSize) {
