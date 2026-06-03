@@ -1,8 +1,9 @@
 #include <raylib.h>
 #include "src/backend/StateManager.h"
-#include "src/states/Title.cpp"
+#include "src/states/Title.h"
 #include "src/Constants.h"
-#include "src/backend/UIHelpers.cpp"
+#include "src/backend/UIHelpers.h"
+#include "DataStructures/country.h"
 
 int main () {
     InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
@@ -17,6 +18,8 @@ int main () {
     StateManager::Instance().ChangeState(new Title());
 
     SetTargetFPS(60);
+
+    country c;
 
     while (WindowShouldClose() == false){
         StateManager::Instance().ProcessStateChange();

@@ -5,18 +5,36 @@
 #include <src/Constants.h>
 
 namespace UI {
-    // Zasoby audio UI
-    extern Sound hoverSound;
-    extern Sound selectSound;
+    inline Sound& HoverSound() {
+        static Sound hoverSound = { 0 };
+        return hoverSound;
+    }
 
-    // Funkcje do zarządzania dźwiękami UI
-    void LoadUISounds();
-    void UnloadUISounds();
-    void PlayHoverSound();
-    void PlaySelectSound();
+    inline Sound& SelectSound() {
+        static Sound selectSound = { 0 };
+        return selectSound;
+    }
 
     inline const char* AssetPath(const char* subPath) {
         return TextFormat("%s/%s", Config::ASSET_PATH.c_str(), subPath);
+    }
+
+    inline void LoadUISounds() {
+        HoverSound() = LoadSound(AssetPath("sounds/ui/hover.mp3"));
+        SelectSound() = LoadSound(AssetPath("sounds/ui/click.mp3"));
+    }
+
+    inline void UnloadUISounds() {
+        UnloadSound(HoverSound());
+        UnloadSound(SelectSound());
+    }
+
+    inline void PlayHoverSound() {
+        PlaySound(HoverSound());
+    }
+
+    inline void PlaySelectSound() {
+        PlaySound(SelectSound());
     }
 
     inline Font LoadStandardFont(int fontSize) {
