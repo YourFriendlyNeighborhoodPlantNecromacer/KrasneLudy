@@ -72,6 +72,11 @@ class Title : public GameState {
 		DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, GOLD);
 
 		DrawTexture(umk_logo, 5, Config::SCREEN_HEIGHT - umk_logo.height - 5, WHITE);
+
+		// Rok produkcji w prawym dolnym rogu
+		const char* yearText = "2026";
+		Vector2 yearSize = MeasureTextEx(customFont, yearText, 20, 2);
+		DrawTextEx(customFont, yearText, { (float)Config::SCREEN_WIDTH - yearSize.x - 10, (float)Config::SCREEN_HEIGHT - yearSize.y - 10 }, 20, 2, GRAY);
 	}
 
 	~Title() {
@@ -91,29 +96,24 @@ class Title : public GameState {
 void Title::Update(float dt) {
 	introTimer += dt;
 
-	// Sterowanie klawiaturą - nawigacja
 	if (IsKeyPressed(KEY_UP)) selectedItem = (selectedItem + 2) % 3;
 	if (IsKeyPressed(KEY_DOWN)) selectedItem = (selectedItem + 1) % 3;
 
-	// Obsługa myszy
 	Vector2 mouse = GetMousePosition();
 	if (CheckCollisionPointRec(mouse, btnVis)) selectedItem = 0;
 	else if (CheckCollisionPointRec(mouse, btnCredits)) selectedItem = 1;
 	else if (CheckCollisionPointRec(mouse, btnExit)) selectedItem = 2;
 
-	// Zmiana kursora na rączkę przy najechaniu na logo UMK lub przyciski menu
 	if (CheckCollisionPointRec(mouse, btnUmk) || CheckCollisionPointRec(mouse, btnVis) ||
 		CheckCollisionPointRec(mouse, btnCredits) || CheckCollisionPointRec(mouse, btnExit)) {
 		SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
 	} else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
-	// Dźwięk najechania (tylko przy zmianie)
 	if (selectedItem != lastSelectedItem) {
 		UI::PlayHoverSound();
 		lastSelectedItem = selectedItem;
 	}
 
-	// Potwierdzenie wyboru klawiaturą (ENTER)
 	if (IsKeyPressed(KEY_ENTER)) {
 		UI::PlaySelectSound();
 		if (selectedItem == 0) {
@@ -126,7 +126,6 @@ void Title::Update(float dt) {
 			exit(0);
 		}
 	}
-	// Potwierdzenie wyboru myszą (LEFT_BUTTON)
 	else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
 		if (CheckCollisionPointRec(mouse, btnUmk)) {
 			UI::PlaySelectSound();
