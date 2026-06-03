@@ -8,6 +8,7 @@
 
 #include "../GLUGLU/datastructures/linear/dynamic_array/dynamic_array.h"
 #include "../GLUGLU/datastructures/structures/couple/couple.h"
+#include "../src/Constants.h"
 
 class country{
 private:
@@ -35,17 +36,17 @@ public:
     bool construct_from_file(const std::string &file_name);
 
 
-    dynamic_array<couple<material, int64_t>> get_active_workplaces();
-    std::unique_ptr<dynamic_array<couple<material, int64_t>>>construct_rim_around_country();
-    couple<material,int64_t> find_starting_point_of_rim(const dynamic_array<couple<material,int64_t>>& active);
+    dynamic_array<couple<NamedValues::material, int64_t>> get_active_workplaces();
+    std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>>construct_rim_around_country();
+    couple<NamedValues::material,int64_t> find_starting_point_of_rim(const dynamic_array<couple<NamedValues::material,int64_t>>& active);
     bool is_empty();
     double det(
-    const couple<material, int64_t>& p0,
-    const couple<material, int64_t>& pi,
-    const couple<material, int64_t>& pj
+    const couple<NamedValues::material, int64_t>& p0,
+    const couple<NamedValues::material, int64_t>& pi,
+    const couple<NamedValues::material, int64_t>& pj
     );
     double angle_in_relation_to_p0(int64_t p0_index, int64_t pi_index, workplace* arr);
-    double optimize_material(material m);
+    double optimize_material(NamedValues::material m);
     void add_edge(
     dynamic_array<
         dynamic_array<edge>

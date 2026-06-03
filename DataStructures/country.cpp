@@ -5,20 +5,19 @@
 #include <memory>
 #include <vector>
 #include "country.h"
-#include "../constants.h"
+#include "../src/Constants.h"
 #include "../GLUGLU/functions/new_line.h"
 #include "../GLUGLU/functions/tabulator.h"
 #include "../GLUGLU/datastructures/linear/queues/queue/queue.h"
-#include "../constants.h"
 #include "../GLUGLU/functions/distance.h"
 
 country::edge::edge(){}
 country::edge::edge(int64_t to, int64_t rev, int64_t capacity, double cost) : to(to), rev(rev), capacity(capacity), cost(cost){}
 
 
-country::country() : workplaces(material::size), houses(material::size)
+country::country() : workplaces(NamedValues::material::size), houses(NamedValues::material::size)
 {
-    for(int i = 0; i < material::size; i++)
+    for(int i = 0; i < NamedValues::material::size; i++)
     {
         workplaces.insert(dynamic_array<std::unique_ptr<workplace>>(), i);
 
@@ -33,13 +32,13 @@ bool country::is_empty(){
     return workplaces.is_empty() && houses.is_empty();
 }
 
-dynamic_array<couple<material, int64_t>>
+dynamic_array<couple<NamedValues::material, int64_t>>
 country::get_active_workplaces()
 {
-    dynamic_array<couple<material, int64_t>> active;
+    dynamic_array<couple<NamedValues::material, int64_t>> active;
 
     for(int64_t material_type = 0;
-        material_type < material::size;
+        material_type < NamedValues::material::size;
         material_type++)
     {
         for(int64_t i = 0;
@@ -51,7 +50,7 @@ country::get_active_workplaces()
 
             active.append(
                 {
-                    static_cast<material>(material_type),
+                    static_cast<NamedValues::material>(material_type),
                     i
                 }
             );
@@ -61,17 +60,17 @@ country::get_active_workplaces()
     return active;
 }
 
-couple<material, int64_t> country::find_starting_point_of_rim(const dynamic_array<couple<material, int64_t>>& active){
-    couple<material, int64_t> best = active[0];
+couple<NamedValues::material, int64_t> country::find_starting_point_of_rim(const dynamic_array<couple<NamedValues::material, int64_t>>& active){
+    couple<NamedValues::material, int64_t> best = active[0];
 
     for(int64_t i = 1; i <= active.get_last_index();i++)
     {
         workplace* current = workplaces[active[i].value_a][active[i].value_b].get();
         workplace* lowest =workplaces[best.value_a][best.value_b].get();
 
-        if(current->coordinates[axis::Y] < lowest->coordinates[axis::Y]){best = active[i];}
-        else if(current->coordinates[axis::Y]==lowest->coordinates[axis::Y]){
-            if(current->coordinates[axis::X]<lowest->coordinates[axis::X])best = active[i];
+        if(current->coordinates[NamedValues::axis::Y] < lowest->coordinates[NamedValues::axis::Y]){best = active[i];}
+        else if(current->coordinates[NamedValues::axis::Y]==lowest->coordinates[NamedValues::axis::Y]){
+            if(current->coordinates[NamedValues::axis::X]<lowest->coordinates[NamedValues::axis::X])best = active[i];
         }
     }
     return best;
@@ -88,7 +87,7 @@ bool country::construct_from_file(const std::string &file_name){
     std::string line;
 
     /// WORKPLACES
-    for(int material_type = 0;material_type < material::size;material_type++){
+    for(int material_type = 0;material_type < NamedValues::material::size;material_type++){
         int64_t workplace_index = 0;
 
         while(std::getline(file, line)){
@@ -110,7 +109,7 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             int64_t capacity = static_cast<int64_t>(std::stoll(token));
 
-            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, x, y, z, static_cast<material>(material_type), capacity));
+            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, x, y, z, static_cast<NamedValues::material>(material_type), capacity));
             workplace_index++;
         }
     }
@@ -118,7 +117,7 @@ bool country::construct_from_file(const std::string &file_name){
     /// HOUSES
     for(
         int material_type = 0;
-        material_type < material::size;
+        material_type < NamedValues::material::size;
         material_type++
     )
     {
@@ -140,7 +139,7 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
-            houses[material_type].append(std::make_unique<house>(house_index, x, y, z, static_cast<material>(material_type)));
+            houses[material_type].append(std::make_unique<house>(house_index, x, y, z, static_cast<NamedValues::material>(material_type)));
             house_index++;
         }
     }
@@ -150,23 +149,23 @@ bool country::construct_from_file(const std::string &file_name){
 
 
 
-double country::det(const couple<material, int64_t>& p0, const couple<material, int64_t>& pi, const couple<material, int64_t>& pj)
+double country::det(const couple<NamedValues::material, int64_t>& p0, const couple<NamedValues::material, int64_t>& pi, const couple<NamedValues::material, int64_t>& pj)
 {
     workplace* wp0 = workplaces[p0.value_a][p0.value_b].get();
     workplace* wpi = workplaces[pi.value_a][pi.value_b].get();
     workplace* wpj = workplaces[pj.value_a][pj.value_b].get();
 
-    return (wpi->coordinates[axis::X] - wp0->coordinates[axis::X]) * (wpj->coordinates[axis::Y] - wp0->coordinates[axis::Y])
-        - (wpj->coordinates[axis::X] - wp0->coordinates[axis::X]) * (wpi->coordinates[axis::Y] - wp0->coordinates[axis::Y]);
+    return (wpi->coordinates[NamedValues::axis::X] - wp0->coordinates[NamedValues::axis::X]) * (wpj->coordinates[NamedValues::axis::Y] - wp0->coordinates[NamedValues::axis::Y])
+        - (wpj->coordinates[NamedValues::axis::X] - wp0->coordinates[NamedValues::axis::X]) * (wpi->coordinates[NamedValues::axis::Y] - wp0->coordinates[NamedValues::axis::Y]);
 }
 
 double country::angle_in_relation_to_p0(int64_t p0_index, int64_t pi_index, workplace* arr){
-    return ((arr[p0_index].coordinates[axis::X] - arr[pi_index].coordinates[axis::X]) / (arr[p0_index].coordinates[axis::Y] - arr[pi_index].coordinates[axis::Y]));
+    return ((arr[p0_index].coordinates[NamedValues::axis::X] - arr[pi_index].coordinates[NamedValues::axis::X]) / (arr[p0_index].coordinates[NamedValues::axis::Y] - arr[pi_index].coordinates[NamedValues::axis::Y]));
 }
 
-std::unique_ptr<dynamic_array<couple<material, int64_t>>> country::construct_rim_around_country(){
-    dynamic_array<couple<material, int64_t>> active_locations = get_active_workplaces();
-    dynamic_array<couple<material, int64_t>> indexes = active_locations;
+std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>> country::construct_rim_around_country(){
+    dynamic_array<couple<NamedValues::material, int64_t>> active_locations = get_active_workplaces();
+    dynamic_array<couple<NamedValues::material, int64_t>> indexes = active_locations;
     if(active_locations.get_last_index() < 2)return nullptr;
     auto p0 = find_starting_point_of_rim(active_locations);
     int64_t p0_index = -1;
@@ -189,7 +188,7 @@ std::unique_ptr<dynamic_array<couple<material, int64_t>>> country::construct_rim
         }
     }
 
-    auto hull =std::make_unique<dynamic_array<couple<material, int64_t>>>();
+    auto hull =std::make_unique<dynamic_array<couple<NamedValues::material, int64_t>>>();
     hull->append(indexes[0]);
     hull->append(indexes[1]);
 
@@ -365,7 +364,7 @@ bool country::assign_dwarfs_to_workplaces(
 
     for(
         int64_t material_type = 0;
-        material_type < material::size;
+        material_type < NamedValues::material::size;
         material_type++
     )
     {
@@ -382,7 +381,7 @@ bool country::assign_dwarfs_to_workplaces(
 
     for(
         int64_t material_type = 0;
-        material_type < material::size;
+        material_type < NamedValues::material::size;
         material_type++
     )
     {
@@ -578,7 +577,7 @@ void country::dp(int64_t tabulation)
 
     for(
         int material_type = 0;
-        material_type < material::size;
+        material_type < NamedValues::material::size;
         material_type++
     )
     {
@@ -616,8 +615,8 @@ void country::dp(int64_t tabulation)
             std::cout << "COORDINATES: ";
 
             for(
-                int a = axis::X;
-                a <= axis::Z;
+                int a = NamedValues::axis::X;
+                a <= NamedValues::axis::Z;
                 a++
             )
             {
@@ -635,7 +634,7 @@ void country::dp(int64_t tabulation)
 
     for(
         int material_type = 0;
-        material_type < material::size;
+        material_type < NamedValues::material::size;
         material_type++
     )
     {
@@ -661,8 +660,8 @@ void country::dp(int64_t tabulation)
             std::cout << "COORDINATES: ";
 
             for(
-                int a = axis::X;
-                a <= axis::Z;
+                int a = NamedValues::axis::X;
+                a <= NamedValues::axis::Z;
                 a++
             )
             {
@@ -678,4 +677,3 @@ void country::dp(int64_t tabulation)
     tab(tabulation);
     std::cout << "<<<" << std::endl;
 }
-
