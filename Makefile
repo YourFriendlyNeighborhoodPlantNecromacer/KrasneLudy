@@ -373,8 +373,6 @@ SRC = $(call rwildcard, *.c, *.h)
 PROJECT_SRC = main.cpp \
 	DataStructures/country.cpp \
 	DataStructures/house.cpp \
-	DataStructures/location.cpp \
-	DataStructures/road.cpp \
 	DataStructures/workplace.cpp \
 	GLUGLU/functions/new_line.cpp \
 	GLUGLU/functions/tabulator.cpp
