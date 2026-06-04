@@ -35,8 +35,9 @@ class Title : public GameState {
         UnloadImage(umk_img);
 
         Image main_img = LoadImage(UI::AssetPath("images/title/logo.png"));
-        ImageResize(&main_img, main_img.width * 1.5, main_img.height * 1.5);
+        ImageResizeNN(&main_img, (int)(main_img.width * 1.5f), (int)(main_img.height * 1.5f));
         main_logo = LoadTextureFromImage(main_img);
+        SetTextureFilter(main_logo, TEXTURE_FILTER_POINT);
         UnloadImage(main_img);
 
         customFont = UI::LoadStandardFont(40);
@@ -54,7 +55,7 @@ class Title : public GameState {
         UI::DrawTiledBackground(marble_bg);
 
         float alpha = fminf(introTimer / fadeDuration, 1.0f);
-        float posY = (Config::SCREEN_HEIGHT / 4.0f) * alpha;
+        float posY = (Config::SCREEN_HEIGHT / 5.0f) * alpha;
 
         float swayX = sinf(GetTime() * 2.0f) * 15.0f;
         float centerX = (Config::SCREEN_WIDTH / 2.0f) - (main_logo.width / 2.0f);
