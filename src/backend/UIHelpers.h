@@ -2,7 +2,7 @@
 #define UI_HELPERS_H
 
 #include <raylib.h>
-#include <src/Constants.h>
+#include "../Constants.h"
 
 namespace UI {
     inline Sound& HoverSound() {

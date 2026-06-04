@@ -2,9 +2,9 @@
 #define STATE_TITLE_H
 
 #include <cmath>
-#include <src/backend/GameState.h>
-#include <src/backend/StateManager.h>
-#include <src/backend/UIHelpers.h>
+#include "../backend/GameState.h"
+#include "../backend/StateManager.h"
+#include "../backend/UIHelpers.h"
 #include "Visualization.h"
 #include "Credits.h"
 

@@ -1,13 +1,13 @@
 #ifndef STATE_VISUALIZATION_H
 #define STATE_VISUALIZATION_H
 
-#include <src/backend/GameState.h>
-#include <src/backend/StateManager.h>
-#include <src/backend/UIHelpers.h>
+#include "../backend/GameState.h"
+#include "../backend/StateManager.h"
+#include "../backend/UIHelpers.h"
 #include <fstream>
 #include <algorithm>
 
-#include "DataStructures/country.h"
+#include "../../DataStructures/country.h"
 
 inline void GoToTitle();
 
