@@ -88,7 +88,7 @@ public:
                 DrawRectangleGradientV(0, (int)y, (int)sw, (int)gh, BLACK, BLANK);
             } else {
                 // Faza 2: Odsłanianie (górna krawędź "kurtyny" zjeżdża w dół)
-                float t = (progress - 0.5f) * 2.0f; // 0.0 -> 1.0
+                float t = (progress - 0.5f) * 2.5f; // 0.0 -> 1.0
                 float y = t * sh;
                 DrawRectangle(0, (int)y, (int)sw, (int)(sh - y), BLACK);
                 DrawRectangleGradientV(0, (int)(y - gh), (int)sw, (int)gh, BLANK, BLACK);
