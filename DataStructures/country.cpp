@@ -28,6 +28,14 @@ country::country() : workplaces(NamedValues::material::size), houses(NamedValues
 country::~country(){
 }
 
+const dynamic_array<dynamic_array<std::unique_ptr<workplace>>>& country::get_workplaces() const {
+    return workplaces;
+}
+
+const dynamic_array<dynamic_array<std::unique_ptr<house>>>& country::get_houses() const {
+    return houses;
+}
+
 bool country::is_empty(){
     return workplaces.is_empty() && houses.is_empty();
 }
@@ -106,10 +114,14 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
+            double wx = (x * 2.0 - 1.0) * Config::MAP_HALF;
+            double wy = (y * 2.0 - 1.0) * Config::MAP_HALF;
+            double wz = (z * 2.0 - 1.0) * Config::MAP_HALF;
+
             std::getline(ss, token, ';');
             int64_t capacity = static_cast<int64_t>(std::stoll(token));
 
-            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, x, y, z, static_cast<NamedValues::material>(material_type), capacity));
+            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, wx, wy, wz, static_cast<NamedValues::material>(material_type), capacity));
             workplace_index++;
         }
     }
@@ -139,7 +151,11 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
-            houses[material_type].append(std::make_unique<house>(house_index, x, y, z, static_cast<NamedValues::material>(material_type)));
+            double wx = (x * 2.0 - 1.0) * Config::MAP_HALF;
+            double wy = (y * 2.0 - 1.0) * Config::MAP_HALF;
+            double wz = (z * 2.0 - 1.0) * Config::MAP_HALF;
+
+            houses[material_type].append(std::make_unique<house>(house_index, wx, wy, wz, static_cast<NamedValues::material>(material_type)));
             house_index++;
         }
     }

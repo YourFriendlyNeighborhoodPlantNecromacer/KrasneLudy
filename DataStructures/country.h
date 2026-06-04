@@ -35,6 +35,8 @@ public:
 
     bool construct_from_file(const std::string &file_name);
 
+    const dynamic_array<dynamic_array<std::unique_ptr<workplace>>>& get_workplaces() const;
+    const dynamic_array<dynamic_array<std::unique_ptr<house>>>& get_houses() const;
 
     dynamic_array<couple<NamedValues::material, int64_t>> get_active_workplaces();
     std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>>construct_rim_around_country();
