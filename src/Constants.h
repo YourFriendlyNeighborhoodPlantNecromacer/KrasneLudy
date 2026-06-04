@@ -2,13 +2,8 @@
 #define CONSTANTS_H
 
 #include <string>
-
-namespace Config {
-    constexpr int SCREEN_WIDTH = 800;
-    constexpr int SCREEN_HEIGHT = 600;
-
-    const std::string ASSET_PATH = "assets";
-}
+#include <map>
+#include <raylib.h>
 
 namespace NamedValues {
     enum material{
@@ -35,6 +30,25 @@ namespace NamedValues {
         X,
         Y,
         Z
+    };
+}
+
+namespace Config {
+    constexpr int SCREEN_WIDTH = 800;
+    constexpr int SCREEN_HEIGHT = 600;
+
+    const std::string ASSET_PATH = "assets";
+
+    constexpr float MAP_HALF = 1000.0f;
+    constexpr float MAP_SIZE = MAP_HALF * 2.0f;
+
+    const std::map<NamedValues::material, Color> MATERIAL_COLORS = {
+        {NamedValues::material::plants, Color{40, 212, 104, 255}},
+        {NamedValues::material::wood, Color{162, 113, 47, 255}},
+        {NamedValues::material::clay, Color{235, 237, 180, 255}},
+        {NamedValues::material::metal, Color{152, 190, 208, 255}},
+        {NamedValues::material::gems, Color{186, 54, 223, 255}},
+        {NamedValues::material::garden_gnomes, Color{241, 86, 86, 255}}
     };
 }
 
