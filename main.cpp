@@ -3,8 +3,15 @@
 #include "src/states/Title.h"
 #include "src/Constants.h"
 #include "src/backend/UIHelpers.h"
-
+#include "GLUGLU/functions/country_generator.h"
 int main () {
+    country kingdom_country;
+    generate_country("save_file_2.txt", 6, 500, 5000, 20);
+    kingdom_country.construct_from_file("save_file_2.txt");
+    std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>> rurro = kingdom_country.construct_rim_around_country();
+
+
+    ///OKNO
     InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
     SetExitKey(KEY_NULL);
     InitAudioDevice();
@@ -14,17 +21,17 @@ int main () {
     PlayMusicStream(globalBGM);
     UI::LoadUISounds();
 
-    StateManager::Instance().ChangeState(new Title());
+    StateManager::Instance().ChangeState(new Title(&kingdom_country));
 
     SetTargetFPS(60);
 
-    while (WindowShouldClose() == false){
+    while (!WindowShouldClose()){
         StateManager::Instance().ProcessStateChange();
 
         UpdateMusicStream(globalBGM);
 
         float dt = GetFrameTime();
-        StateManager::Instance().Update(dt);
+        StateManager::Instance().Update(dt, &kingdom_country);
 
         BeginDrawing();
             ClearBackground(BLACK);
@@ -38,5 +45,6 @@ int main () {
 
     CloseWindow();
 
+    /**/
     return 0;
 }

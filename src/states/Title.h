@@ -11,6 +11,7 @@
 class Title : public GameState {
     public:
 
+    country* country_ptr;
     Texture2D marble_bg;
     Texture2D main_logo;
     Texture2D umk_logo;
@@ -25,6 +26,8 @@ class Title : public GameState {
     Rectangle btnCredits = { 0 };
     Rectangle btnExit = { 0 };
     Rectangle btnUmk = { 0 };
+
+    Title(country* country_ptr) : country_ptr(country_ptr){}
 
     void Init() override {
         marble_bg = LoadTexture(UI::AssetPath("images/ui/marble.png"));
@@ -49,7 +52,7 @@ class Title : public GameState {
         btnUmk = { 5.0f, (float)Config::SCREEN_HEIGHT - umk_logo.height - 5, (float)umk_logo.width, (float)umk_logo.height };
     }
 
-    void Update(float dt) override;
+    void Update(float dt, country* country_ptr) override;
 
     void Draw() override {
         UI::DrawTiledBackground(marble_bg);
@@ -84,7 +87,7 @@ class Title : public GameState {
     }
 };
 
-inline void Title::Update(float dt) {
+inline void Title::Update(float dt, country* country_ptr) {
     introTimer += dt;
 
     if (IsKeyPressed(KEY_UP)) selectedItem = (selectedItem + 2) % 3;
@@ -108,7 +111,7 @@ inline void Title::Update(float dt) {
     if (IsKeyPressed(KEY_ENTER)) {
         UI::PlaySelectSound();
         if (selectedItem == 0) {
-            StateManager::Instance().ChangeState(new Visualization());
+            StateManager::Instance().ChangeState(new Visualization(country_ptr));
         } else if (selectedItem == 1) {
             StateManager::Instance().ChangeState(new Credits());
         } else if (selectedItem == 2) {
@@ -120,7 +123,7 @@ inline void Title::Update(float dt) {
             OpenURL("https://www.umk.pl/");
         } else if (CheckCollisionPointRec(mouse, btnVis)) {
             UI::PlaySelectSound();
-            StateManager::Instance().ChangeState(new Visualization());
+            StateManager::Instance().ChangeState(new Visualization(country_ptr));
         } else if (CheckCollisionPointRec(mouse, btnCredits)) {
             UI::PlaySelectSound();
             StateManager::Instance().ChangeState(new Credits());
@@ -133,8 +136,8 @@ inline void Title::Update(float dt) {
     if (IsKeyPressed(KEY_ESCAPE)) exit(0);
 }
 
-inline void GoToTitle() {
-    StateManager::Instance().ChangeState(new Title());
+inline void GoToTitle(country* country_ptr) {
+    StateManager::Instance().ChangeState(new Title(country_ptr));
 }
 
 #endif // STATE_TITLE_H

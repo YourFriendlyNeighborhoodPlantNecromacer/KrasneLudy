@@ -9,7 +9,7 @@
 
 #include "../../DataStructures/country.h"
 
-inline void GoToTitle();
+inline void GoToTitle(country* country_ptr);
 
 static inline void DrawWorkplaceMarker(float x, float y, Color fill) {
     const float radius = 32.0f;
@@ -48,9 +48,9 @@ static inline void DrawHouseMarker(float x, float y, Color fill) {
     DrawLineEx(right, roof, 3.0f, WHITE);
 }
 
-static inline void DrawCountryEntities(const country& c) {
-    const auto& workplaces = c.get_workplaces();
-    const auto& houses = c.get_houses();
+static inline void DrawCountryEntities(const country* c) {
+    const auto& workplaces = c->get_workplaces();
+    const auto& houses = c->get_houses();
 
     for(int material_type = 0; material_type < NamedValues::material::size; material_type++) {
         Color fill = Config::MATERIAL_COLORS.at(static_cast<NamedValues::material>(material_type));
@@ -77,13 +77,15 @@ class Visualization : public GameState {
     Camera2D camera;
     Font customFont;
 
-    country c;
+    country* map_pointer;
 
     Rectangle btnBack = { 0 };
     Rectangle btnLoad = { 0 };
 
     int selectedItem = -1;
     int lastSelectedItem = 0;
+
+    Visualization(country* map_pointer) : map_pointer(map_pointer) {}
 
     void Init() override {
         marble_bg = LoadTexture(UI::AssetPath("images/ui/marble.png"));
@@ -107,15 +109,14 @@ class Visualization : public GameState {
         btnLoad = { viewportArea.x, btnBack.y + btnBack.height + 10.0f, 200, 40 };
 
         // Create a small test data file for the country and load it
-        c.construct_from_file("save_file_1.txt");
 
         customFont = UI::LoadStandardFont(40);
     }
 
-    void Update(float dt) override {
+    void Update(float dt, country* country_ptr) override {
         if (IsKeyReleased(KEY_ESCAPE)) {
             UI::PlaySelectSound();
-            GoToTitle();
+            GoToTitle(map_pointer);
         }
 
         float panSpeed = 600.0f * dt / camera.zoom;
@@ -169,7 +170,7 @@ class Visualization : public GameState {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mouse, btnBack)) {
                 UI::PlaySelectSound();
-                GoToTitle();
+                GoToTitle(country_ptr);
             } else if (CheckCollisionPointRec(mouse, btnLoad)) {
                 UI::PlaySelectSound();
             }
@@ -189,7 +190,7 @@ class Visualization : public GameState {
                     }
 
                     // Draw country entity map
-                    DrawCountryEntities(c);
+                    DrawCountryEntities(map_pointer);
             EndMode2D();
         EndScissorMode();
 

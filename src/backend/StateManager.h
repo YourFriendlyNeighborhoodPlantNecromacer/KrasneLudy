@@ -3,6 +3,7 @@
 
 #include "GameState.h"
 #include "raylib.h"
+#include "../../DataStructures/country.h"
 
 class StateManager {
 private:
@@ -60,7 +61,7 @@ public:
         }
     }
 
-    void Update(float dt) {
+    void Update(float dt, country* country_ptr) {
         if (transitioning) {
             transTimer += dt;
             if (transTimer >= transDuration) {
@@ -68,7 +69,7 @@ public:
                 transTimer = 0.0f;
             }
         }
-        if (currentState) currentState->Update(dt);
+        if (currentState) currentState->Update(dt, country_ptr);
     }
 
     void Draw() {

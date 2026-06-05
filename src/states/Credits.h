@@ -5,7 +5,7 @@
 #include "../backend/StateManager.h"
 #include "../backend/UIHelpers.h"
 
-inline void GoToTitle();
+inline void GoToTitle(country* country_ptr);
 
 class Credits : public GameState {
     public:
@@ -20,7 +20,7 @@ class Credits : public GameState {
         btnBack = { 20, 20, 40, 40 };
     }
 
-    void Update(float dt) override {
+    void Update(float dt, country* country_ptr) override {
         Vector2 mouse = GetMousePosition();
 
         if (CheckCollisionPointRec(mouse, btnBack)) {
@@ -30,13 +30,13 @@ class Credits : public GameState {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mouse, btnBack)) {
                 UI::PlaySelectSound();
-                GoToTitle();
+                GoToTitle(country_ptr);
             }
         }
 
         if (IsKeyReleased(KEY_ESCAPE)) {
             UI::PlaySelectSound();
-            GoToTitle();
+            GoToTitle(country_ptr);
         }
     }
 
