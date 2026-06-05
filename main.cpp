@@ -6,10 +6,33 @@
 #include "GLUGLU/functions/country_generator.h"
 int main () {
     country kingdom_country;
-    generate_country("save_file_2.txt", 6, 500, 5000, 20);
+    //generate_country("save_file_2.txt", 5, 5, 10, 4, true, 2);
     kingdom_country.construct_from_file("save_file_2.txt");
-    std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>> rurro = kingdom_country.construct_rim_around_country();
 
+    auto active = kingdom_country.get_active_workplaces();
+    std::cout << "last_index = "
+          << active.get_last_index()
+          << std::endl;
+
+    active.dp();
+
+    kingdom_country.assign_dwarfs_to_workplaces("resounts2.txt");
+
+    active = kingdom_country.get_active_workplaces();
+    std::cout << "last_index = "
+          << active.get_last_index()
+          << std::endl;
+
+    active.dp();
+
+    std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>> rim_points;
+    rim_points = kingdom_country.construct_rim_around_country();
+    if(!rim_points)
+    {
+        std::cout << "NULLPTR" << std::endl;
+        return 0;
+    }
+    rim_points->dp();
 
     ///OKNO
     InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");

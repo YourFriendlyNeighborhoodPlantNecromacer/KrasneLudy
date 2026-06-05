@@ -28,14 +28,6 @@ country::country() : workplaces(NamedValues::material::size), houses(NamedValues
 country::~country(){
 }
 
-const dynamic_array<dynamic_array<std::unique_ptr<workplace>>>& country::get_workplaces() const {
-    return workplaces;
-}
-
-const dynamic_array<dynamic_array<std::unique_ptr<house>>>& country::get_houses() const {
-    return houses;
-}
-
 bool country::is_empty(){
     return workplaces.is_empty() && houses.is_empty();
 }
@@ -114,14 +106,10 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
-            double wx = (x * 2.0 - 1.0) * Config::MAP_HALF;
-            double wy = (y * 2.0 - 1.0) * Config::MAP_HALF;
-            double wz = (z * 2.0 - 1.0) * Config::MAP_HALF;
-
             std::getline(ss, token, ';');
             int64_t capacity = static_cast<int64_t>(std::stoll(token));
 
-            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, wx, wy, wz, static_cast<NamedValues::material>(material_type), capacity));
+            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, x, y, z, static_cast<NamedValues::material>(material_type), capacity));
             workplace_index++;
         }
     }
@@ -151,11 +139,7 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
-            double wx = (x * 2.0 - 1.0) * Config::MAP_HALF;
-            double wy = (y * 2.0 - 1.0) * Config::MAP_HALF;
-            double wz = (z * 2.0 - 1.0) * Config::MAP_HALF;
-
-            houses[material_type].append(std::make_unique<house>(house_index, wx, wy, wz, static_cast<NamedValues::material>(material_type)));
+            houses[material_type].append(std::make_unique<house>(house_index, x, y, z, static_cast<NamedValues::material>(material_type)));
             house_index++;
         }
     }
@@ -288,21 +272,12 @@ bool country::spfa( dynamic_array<dynamic_array<edge>>& graph, int64_t source, i
     return parent_v[sink] != -1;
 }
 
-double country::min_cost_max_flow(
-    dynamic_array<dynamic_array<edge>>& graph,
-    int64_t source,
-    int64_t sink
-)
-{
+double country::min_cost_max_flow(dynamic_array<dynamic_array<edge>>& graph, int64_t source, int64_t sink){
     std::cout << "Calling min_cost_max_flow(" << source << ", " << sink << ")" << std::endl;
     double total_cost = 0.0;
 
-    if(source == sink)
-    {
-        std::cerr
-            << "ERROR: source == sink"
-            << std::endl;
-
+    if(source == sink){
+        std::cerr << "ERROR: source == sink" << std::endl;
         return 0.0;
     }
 
@@ -315,36 +290,12 @@ double country::min_cost_max_flow(
 
         for( int64_t v = sink; v != source; v = parent_v[v]){
             edge& e = graph[parent_v[v]][parent_e[v]];
-
             if(e.capacity < flow)flow = e.capacity;
         }
-
-        for(
-            int64_t v = sink;
-            v != source;
-            v = parent_v[v]
-        )
-        {
-            edge& e =
-                graph
-                [
-                    parent_v[v]
-                ]
-                [
-                    parent_e[v]
-                ];
-
+        for(int64_t v = sink; v != source; v = parent_v[v]){
+            edge& e = graph[parent_v[v]][parent_e[v]];
             e.capacity -= flow;
-
-            graph
-            [
-                e.to
-            ]
-            [
-                e.rev
-            ]
-            .capacity += flow;
-
+            graph[e.to][e.rev].capacity += flow;
             total_cost += flow * e.cost;
         }
     }
@@ -360,212 +311,74 @@ double country::min_cost_max_flow()
     int64_t sink = 0;
     std::cout << "Calling min_cost_max_flow()" << std::endl;
 
-    return min_cost_max_flow(
-        graph,
-        source,
-        sink
-    );
+    return min_cost_max_flow(graph, source, sink);
 }
 
-bool country::assign_dwarfs_to_workplaces(
-    const std::string& output_file
-)
-{
+bool country::assign_dwarfs_to_workplaces(const std::string& output_file){
     std::ofstream file(output_file);
 
-    if(!file.is_open())
-    {
-        return false;
+    if(!file.is_open()) return false;
+
+    for(int64_t material_type = 0; material_type < NamedValues::material::size; material_type++){
+        for(int64_t i = 0; i <= workplaces[material_type].get_last_index(); i++) workplaces[material_type][i]->amount_of_dwarfs_working = 0;
     }
 
-    for(
-        int64_t material_type = 0;
-        material_type < NamedValues::material::size;
-        material_type++
-    )
-    {
-        for(
-            int64_t i = 0;
-            i <= workplaces[material_type].get_last_index();
-            i++
-        )
-        {
-            workplaces[material_type][i]
-                ->amount_of_dwarfs_working = 0;
-        }
-    }
+    for(int64_t material_type = 0; material_type < NamedValues::material::size; material_type++){
+        int64_t houses_count = houses[material_type].get_last_index() + 1;
 
-    for(
-        int64_t material_type = 0;
-        material_type < NamedValues::material::size;
-        material_type++
-    )
-    {
-        int64_t houses_count =
-            houses[material_type].get_last_index() + 1;
+        int64_t workplaces_count = workplaces[material_type].get_last_index() + 1;
 
-        int64_t workplaces_count =
-            workplaces[material_type].get_last_index() + 1;
+        file << "===== MATERIAL " << material_type << " =====\n";
 
-        file
-            << "===== MATERIAL "
-            << material_type
-            << " =====\n";
-
-        if(
-            houses_count <= 0 ||
-            workplaces_count <= 0
-        )
-        {
-            file << "(no assignments)\n\n";
-            continue;
-        }
+        if(houses_count <= 0 || workplaces_count <= 0)continue;
 
         int64_t source = 0;
-
         int64_t house_offset = 1;
 
-        int64_t workplace_offset =
-            house_offset + houses_count;
+        int64_t workplace_offset = house_offset + houses_count;
 
-        int64_t sink =
-            workplace_offset +
-            workplaces_count;
+        int64_t sink = workplace_offset + workplaces_count;
 
         int64_t vertices = sink + 1;
 
-        dynamic_array<
-            dynamic_array<edge>
-        > graph;
+        dynamic_array<dynamic_array<edge>> graph;
 
-        for(
-            int64_t i = 0;
-            i < vertices;
-            i++
-        )
-        {
-            graph.append(
-                dynamic_array<edge>()
-            );
-        }
+        for(int64_t i = 0; i < vertices; i++) graph.append(dynamic_array<edge>());
 
-        for(
-            int64_t h = 0;
-            h < houses_count;
-            h++
-        )
-        {
-            add_edge(
-                graph,
-                source,
-                house_offset + h,
-                1,
-                0.0
-            );
-        }
+        for(int64_t h = 0; h < houses_count; h++) add_edge(graph, source, house_offset + h, 1, 0.0 );
 
-        for(
-            int64_t h = 0;
-            h < houses_count;
-            h++
-        )
-        {
-            house* current_house =
-                houses[material_type][h].get();
+        for(int64_t h = 0; h < houses_count; h++){
+            house* current_house = houses[material_type][h].get();
 
-            for(
-                int64_t w = 0;
-                w < workplaces_count;
-                w++
-            )
-            {
-                workplace* current_workplace =
-                    workplaces[material_type][w].get();
+            for(int64_t w = 0; w < workplaces_count; w++){
+                workplace* current_workplace = workplaces[material_type][w].get();
 
-                double cost =
-                    distance(
-                        current_house->coordinates,
-                        current_workplace->coordinates
-                    );
+                double cost = distance(current_house->coordinates, current_workplace->coordinates);
 
-                add_edge(
-                    graph,
-                    house_offset + h,
-                    workplace_offset + w,
-                    1,
-                    cost
-                );
+                add_edge(graph, house_offset + h, workplace_offset + w, 1, cost);
             }
         }
 
-        for(
-            int64_t w = 0;
-            w < workplaces_count;
-            w++
-        )
-        {
-            add_edge(
-                graph,
-                workplace_offset + w,
-                sink,
-                workplaces[material_type][w]
-                    ->capacity,
-                0.0
-            );
+        for(int64_t w = 0; w < workplaces_count; w++){
+            add_edge(graph, workplace_offset + w, sink, workplaces[material_type][w]->capacity, 0.0);
         }
 
-        min_cost_max_flow(
-            graph,
-            source,
-            sink
-        );
+        min_cost_max_flow(graph, source, sink);
 
         bool found_assignment = false;
 
-        for(
-            int64_t h = 0;
-            h < houses_count;
-            h++
-        )
-        {
-            int64_t house_vertex =
-                house_offset + h;
+        for(int64_t h = 0; h < houses_count; h++){
+            int64_t house_vertex = house_offset + h;
 
-            for(
-                int64_t e = 0;
-                e <= graph[house_vertex].get_last_index();
-                e++
-            )
-            {
-                edge& ed =
-                    graph[house_vertex][e];
+            for(int64_t e = 0;e <= graph[house_vertex].get_last_index();e++){
+                edge& ed = graph[house_vertex][e];
 
-                if(
-                    ed.to >= workplace_offset &&
-                    ed.to < sink &&
-                    ed.capacity == 0
-                )
-                {
-                    int64_t workplace_index =
-                        ed.to - workplace_offset;
+                if(ed.to >= workplace_offset && ed.to < sink && ed.capacity == 0){
+                    int64_t workplace_index = ed.to - workplace_offset;
 
-                    workplaces
-                    [
-                        material_type
-                    ]
-                    [
-                        workplace_index
-                    ]
-                    ->
-                    amount_of_dwarfs_working++;
+                    workplaces[material_type][workplace_index]->amount_of_dwarfs_working++;
 
-                    file
-                        << "House "
-                        << h
-                        << " -> Workplace "
-                        << workplace_index
-                        << '\n';
-
+                    file << "House " << h << " -> Workplace " << workplace_index << '\n';
                     found_assignment = true;
                     break;
                 }
@@ -583,63 +396,39 @@ bool country::assign_dwarfs_to_workplaces(
     return true;
 }
 
-void country::dp(int64_t tabulation)
-{
+const dynamic_array<dynamic_array<std::unique_ptr<workplace>>>& country::get_workplaces() const{
+    return workplaces;
+}
+
+const dynamic_array<dynamic_array<std::unique_ptr<house>>>& country::get_houses() const{
+    return houses;
+}
+
+void country::dp(int64_t tabulation){
     tab(tabulation);
     std::cout << ">>> DEBUG PRINT OF A COUNTRY" << std::endl;
 
     tab(tabulation);
     std::cout << "WORKPLACES:" << std::endl;
 
-    for(
-        int material_type = 0;
-        material_type < NamedValues::material::size;
-        material_type++
-    )
-    {
-        tab(tabulation + 4);
-        std::cout
-            << "MATERIAL: "
-            << material_type
-            << std::endl;
+    for( int material_type = 0; material_type < NamedValues::material::size; material_type++){
+        tab(tabulation + NamedValues::constant::tabulator_indent);
+        std::cout << "MATERIAL: " << material_type << std::endl;
 
-        for(
-            int64_t i = 0;
-            i <= workplaces[material_type].get_last_index();
-            i++
-        )
-        {
-            tab(tabulation + 8);
-            std::cout
-                << "INDEX: "
-                << workplaces[material_type][i]->index
-                << std::endl;
+        for(int64_t i = 0; i <= workplaces[material_type].get_last_index(); i++){
+            tab(tabulation + NamedValues::constant::tabulator_indent * 2);
+            std::cout << "INDEX: " << workplaces[material_type][i]->index << std::endl;
 
-            tab(tabulation + 8);
-            std::cout
-                << "CAPACITY: "
-                << workplaces[material_type][i]->capacity
-                << std::endl;
+            tab(tabulation + NamedValues::constant::tabulator_indent * 2);
+            std::cout << "CAPACITY: " << workplaces[material_type][i]->capacity << std::endl;
 
-            tab(tabulation + 8);
-            std::cout
-                << "DWARFS WORKING: "
-                << workplaces[material_type][i]->amount_of_dwarfs_working
-                << std::endl;
+            tab(tabulation + NamedValues::constant::tabulator_indent * 2);
+            std::cout << "DWARFS WORKING: " << workplaces[material_type][i]->amount_of_dwarfs_working << std::endl;
 
-            tab(tabulation + 8);
+            tab(tabulation + NamedValues::constant::tabulator_indent * 2);
             std::cout << "COORDINATES: ";
 
-            for(
-                int a = NamedValues::axis::X;
-                a <= NamedValues::axis::Z;
-                a++
-            )
-            {
-                std::cout
-                    << workplaces[material_type][i]->coordinates[a]
-                    << " ";
-            }
+            for(int a = NamedValues::axis::X; a <= NamedValues::axis::Z; a++) std::cout << workplaces[material_type][i]->coordinates[a] << " ";
 
             std::cout << std::endl;
         }
@@ -648,43 +437,19 @@ void country::dp(int64_t tabulation)
     tab(tabulation);
     std::cout << "HOUSES:" << std::endl;
 
-    for(
-        int material_type = 0;
-        material_type < NamedValues::material::size;
-        material_type++
-    )
+    for(int material_type = 0; material_type < NamedValues::material::size; material_type++)
     {
         tab(tabulation + 4);
-        std::cout
-            << "FAVORITE MATERIAL: "
-            << material_type
-            << std::endl;
+        std::cout << "FAVORITE MATERIAL: " << material_type << std::endl;
 
-        for(
-            int64_t i = 0;
-            i <= houses[material_type].get_last_index();
-            i++
-        )
-        {
+        for(int64_t i = 0; i <= houses[material_type].get_last_index(); i++){
             tab(tabulation + 8);
-            std::cout
-                << "INDEX: "
-                << houses[material_type][i]->index
-                << std::endl;
+            std::cout << "INDEX: " << houses[material_type][i]->index << std::endl;
 
             tab(tabulation + 8);
             std::cout << "COORDINATES: ";
 
-            for(
-                int a = NamedValues::axis::X;
-                a <= NamedValues::axis::Z;
-                a++
-            )
-            {
-                std::cout
-                    << houses[material_type][i]->coordinates[a]
-                    << " ";
-            }
+            for(int a = NamedValues::axis::X; a <= NamedValues::axis::Z; a++) std::cout << houses[material_type][i]->coordinates[a] << " ";
 
             std::cout << std::endl;
         }
