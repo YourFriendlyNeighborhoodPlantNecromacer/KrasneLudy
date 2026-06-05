@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include "src/backend/StateManager.h"
+#include "src/backend/SettingsManager.h"
 #include "src/states/Title.h"
 #include "src/Constants.h"
 #include "src/backend/UIHelpers.h"
@@ -11,8 +12,8 @@ int main () {
 
     auto active = kingdom_country.get_active_workplaces();
     std::cout << "last_index = "
-          << active.get_last_index()
-          << std::endl;
+        << active.get_last_index()
+        << std::endl;
 
     active.dp();
 
@@ -20,8 +21,8 @@ int main () {
 
     active = kingdom_country.get_active_workplaces();
     std::cout << "last_index = "
-          << active.get_last_index()
-          << std::endl;
+        << active.get_last_index()
+        << std::endl;
 
     active.dp();
 
@@ -35,9 +36,14 @@ int main () {
     rim_points->dp();
 
     ///OKNO
+    SettingsManager::Instance().LoadSettings();
+
     InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
     SetExitKey(KEY_NULL);
     InitAudioDevice();
+
+    // Apply settings to game
+    SettingsManager::Instance().GetSettings().ApplyToGame();
 
     // Ładowanie globalnych zasobów audio
     Music globalBGM = LoadMusicStream(UI::AssetPath("music/bgm.mp3"));
@@ -52,22 +58,28 @@ int main () {
         StateManager::Instance().ProcessStateChange();
 
         UpdateMusicStream(globalBGM);
+        // Dynamiczna aktualizacja głośności muzyki z uwzględnieniem ustawień
+        SetMusicVolume(globalBGM, SettingsManager::Instance().GetSettings().musicVolume);
 
-        float dt = GetFrameTime();
-        StateManager::Instance().Update(dt, &kingdom_country);
+        float deltatime = GetFrameTime();
+        StateManager::Instance().Update(deltatime, &kingdom_country);
 
         BeginDrawing();
             ClearBackground(BLACK);
             StateManager::Instance().Draw();
+
+            if (SettingsManager::Instance().GetSettings().showFPS) {
+                DrawText(TextFormat("FPS: %i", GetFPS()), 10, 10, 20, LIME);
+            }
         EndDrawing();
     }
 
+    StateManager::Instance().Shutdown();
     UI::UnloadUISounds();
     UnloadMusicStream(globalBGM);
     CloseAudioDevice();
 
     CloseWindow();
 
-    /**/
     return 0;
 }

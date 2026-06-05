@@ -4,34 +4,48 @@
 #include "../backend/GameState.h"
 #include "../backend/StateManager.h"
 #include "../backend/UIHelpers.h"
+#include "../backend/classes/Button.h"
 
 inline void GoToTitle(country* country_ptr);
 
 class Credits : public GameState {
     public:
+    // Stałe układu i stylizacji
+    static constexpr float HEADER_FONT_SIZE = 40.0f;
+    static constexpr float NAME_FONT_SIZE = 30.0f;
+    static constexpr float FOOTER_FONT_SIZE = 15.0f;
 
-    Texture2D marble_bg;
-    Rectangle btnBack = { 0 };
-    Font customFont;
+    static constexpr float TITLE_Y_OFFSET = 100.0f;
+    static constexpr float NAMES_START_Y = 220.0f;
+    static constexpr float NAMES_SPACING_Y = 60.0f;
+
+    static constexpr float UI_MARGIN = 20.0f;
+    static constexpr float BACK_BTN_SIZE = 40.0f;
+    static constexpr float BACK_BTN_FONT_SIZE = 25.0f;
+
+    static constexpr float FOOTER_BOTTOM_MARGIN = 40.0f;
+
+    Texture2D backgroundTexture;
+    Font creditsFont;
+    UI::Button btnBack;
+
+    Credits() : backgroundTexture{0}, creditsFont{0} {}
 
     void Init() override {
-        marble_bg = LoadTexture(UI::AssetPath("images/ui/marble.png"));
-        customFont = UI::LoadStandardFont(40);
-        btnBack = { 20, 20, 40, 40 };
+        backgroundTexture = LoadTexture(UI::AssetPath(UI::GetBackgroundPath()));
+        creditsFont = UI::LoadStandardFont(HEADER_FONT_SIZE);
+
+        btnBack = UI::Button({ UI_MARGIN, UI_MARGIN, BACK_BTN_SIZE, BACK_BTN_SIZE }, "X", creditsFont, MAROON, RED, WHITE, BLACK, BACK_BTN_FONT_SIZE, 0.0f);
     }
 
-    void Update(float dt, country* country_ptr) override {
-        Vector2 mouse = GetMousePosition();
-
-        if (CheckCollisionPointRec(mouse, btnBack)) {
+    void Update(float deltatime, country* country_ptr) override {
+        if (btnBack.IsHovered()) {
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         } else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            if (CheckCollisionPointRec(mouse, btnBack)) {
-                UI::PlaySelectSound();
-                GoToTitle(country_ptr);
-            }
+        if (btnBack.Update()) {
+            UI::PlaySelectSound();
+            GoToTitle(country_ptr);
         }
 
         if (IsKeyReleased(KEY_ESCAPE)) {
@@ -41,38 +55,35 @@ class Credits : public GameState {
     }
 
     void Draw() override {
-        UI::DrawTiledBackground(marble_bg);
+        UI::DrawTiledBackground(backgroundTexture);
 
         const char* titleText = "TWÓRCY ROZWIĄZANIA PROJEKTU:";
         const char* names[] = {
-            "Szymon Zakierski",
             "Antoni Narożny",
+            "Szymon Zakierski",
             "Dawid",
             "Franciszek"
         };
 
-        Vector2 titleSize = MeasureTextEx(customFont, titleText, 40, 2);
-        DrawTextEx(customFont, titleText, { (Config::SCREEN_WIDTH - titleSize.x) / 2, 100 }, 40, 2, DARKGRAY);
+        Vector2 titleSize = MeasureTextEx(creditsFont, titleText, HEADER_FONT_SIZE, 2);
+        DrawTextEx(creditsFont, titleText, { (Config::SCREEN_WIDTH - titleSize.x) / 2, TITLE_Y_OFFSET }, HEADER_FONT_SIZE, 2, DARKGRAY);
 
-        for (int i = 0; i < 4; i++) {
-            int posY = 220 + (i * 60);
-            Vector2 nameSize = MeasureTextEx(customFont, names[i], 30, 2);
-            DrawTextEx(customFont, names[i], { (Config::SCREEN_WIDTH - nameSize.x) / 2, (float)posY }, 30, 2, BLACK);
+        for (size_t i = 0; i < sizeof(names)/sizeof(names[0]); i++) {
+            float posY = NAMES_START_Y + (i * NAMES_SPACING_Y);
+            Vector2 nameSize = MeasureTextEx(creditsFont, names[i], NAME_FONT_SIZE, 2);
+            DrawTextEx(creditsFont, names[i], { (Config::SCREEN_WIDTH - nameSize.x) / 2, posY }, NAME_FONT_SIZE, 2, BLACK);
         }
 
         const char* audioCredits = "AUDIO: Freesound.org";
-        Vector2 audioSize = MeasureTextEx(customFont, audioCredits, 15, 1);
-        DrawTextEx(customFont, audioCredits, { (Config::SCREEN_WIDTH - audioSize.x) / 2, Config::SCREEN_HEIGHT - 40.0f }, 15, 1, DARKGRAY);
+        Vector2 audioSize = MeasureTextEx(creditsFont, audioCredits, FOOTER_FONT_SIZE, 1);
+        DrawTextEx(creditsFont, audioCredits, { (Config::SCREEN_WIDTH - audioSize.x) / 2, (float)Config::SCREEN_HEIGHT - FOOTER_BOTTOM_MARGIN }, FOOTER_FONT_SIZE, 1, DARKGRAY);
 
-        bool hover = CheckCollisionPointRec(GetMousePosition(), btnBack);
-        DrawRectangleRec(btnBack, hover ? RED : MAROON);
-        DrawRectangleLinesEx(btnBack, 2, BLACK);
-        DrawText("X", btnBack.x + 12, btnBack.y + 8, 25, WHITE);
+        btnBack.Draw();
     }
 
     ~Credits() {
-        UnloadTexture(marble_bg);
-        UnloadFont(customFont);
+        if (backgroundTexture.id > 0) UnloadTexture(backgroundTexture);
+        if (creditsFont.texture.id > 0) UnloadFont(creditsFont);
     }
 };
 

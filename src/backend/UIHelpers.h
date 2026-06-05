@@ -3,8 +3,14 @@
 
 #include <raylib.h>
 #include "../Constants.h"
+#include "SettingsManager.h"
 
 namespace UI {
+    static constexpr int ASCII_START_CODEPOINT = 32;
+    static constexpr int ASCII_GLYPH_COUNT = 95;
+    static constexpr int POLISH_GLYPH_COUNT = 18;
+    static constexpr int TOTAL_GLYPH_COUNT = ASCII_GLYPH_COUNT + POLISH_GLYPH_COUNT;
+
     inline Sound& HoverSound() {
         static Sound hoverSound = { 0 };
         return hoverSound;
@@ -30,35 +36,36 @@ namespace UI {
     }
 
     inline void PlayHoverSound() {
+        SetSoundVolume(HoverSound(), SettingsManager::Instance().GetSettings().sfxVolume);
         PlaySound(HoverSound());
     }
 
     inline void PlaySelectSound() {
+        SetSoundVolume(SelectSound(), SettingsManager::Instance().GetSettings().sfxVolume);
         PlaySound(SelectSound());
     }
 
+    inline const char* GetBackgroundPath() {
+        int idx = SettingsManager::Instance().GetSettings().menuBackgroundIndex;
+        return (idx == 0) ? "images/ui/marble.png" : "images/ui/marble_dark.png";
+    }
+
+    // Ładowanie czcionki ze wsparciem dla znaków polskich gdyż to nie standard w raylib
     inline Font LoadStandardFont(int fontSize) {
-        int codepoints[128] = { 0 };
-        for (int i = 0; i < 95; i++) codepoints[i] = 32 + i;
+        int codepoints[TOTAL_GLYPH_COUNT] = { 0 };
+        for (int i = 0; i < ASCII_GLYPH_COUNT; i++) codepoints[i] = ASCII_START_CODEPOINT + i;
         int polish[] = { 0x0104, 0x0105, 0x0106, 0x0107, 0x0118, 0x0119, 0x0141, 0x0142, 0x0143, 0x0144, 0x00D3, 0x00F3, 0x015A, 0x015B, 0x0179, 0x017A, 0x017B, 0x017C };
-        for (int i = 0; i < 18; i++) codepoints[95 + i] = polish[i];
-        return LoadFontEx(AssetPath("fonts/Ranchers-Regular.ttf"), fontSize, codepoints, 95 + 18);
+        for (int i = 0; i < POLISH_GLYPH_COUNT; i++) codepoints[ASCII_GLYPH_COUNT + i] = polish[i];
+        return LoadFontEx(AssetPath("fonts/Ranchers-Regular.ttf"), fontSize, codepoints, TOTAL_GLYPH_COUNT);
     }
 
     inline void DrawTiledBackground(Texture2D texture) {
+        if (texture.width <= 0 || texture.height <= 0) return;
         for (int x = 0; x < Config::SCREEN_WIDTH; x += texture.width) {
             for (int y = 0; y < Config::SCREEN_HEIGHT; y += texture.height) {
                 DrawTexture(texture, x, y, WHITE);
             }
         }
-    }
-
-    inline void DrawMenuButton(Rectangle rec, const char* text, Font font, Color hoverColor = DARKGRAY, Color regularColor = GRAY) {
-        bool hover = CheckCollisionPointRec(GetMousePosition(), rec);
-        DrawRectangleRec(rec, hover ? hoverColor : regularColor);
-        DrawRectangleLinesEx(rec, 2, BLACK);
-        Vector2 textSize = MeasureTextEx(font, text, 20, 2);
-        DrawTextEx(font, text, { rec.x + (rec.width - textSize.x) / 2, rec.y + 10 }, 20, 2, WHITE);
     }
 }
 

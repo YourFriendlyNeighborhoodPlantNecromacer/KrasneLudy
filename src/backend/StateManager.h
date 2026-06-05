@@ -11,10 +11,15 @@ private:
     GameState* nextState = nullptr;
 
     // Logika przejścia (Transition)
-    float transTimer = 0.0f;
+    float transitionTimer = 0.0f;
     bool transitioning = false;
     bool stateSwapped = false;
-    const float transDuration = 1.0f; // Całkowity czas trwania przejścia (sekundy)
+
+    static constexpr float TRANSITION_DURATION = 1.0f;
+    static constexpr float GRADIENT_HEIGHT = 180.0f;
+    static constexpr float MID_TRANSITION_THRESHOLD = 0.5f;
+    static constexpr float ANIMATION_SPEED_SCALE = 2.5f;
+    static constexpr float PHASE_OFFSET = -0.5f;
 
     StateManager() {}
 
@@ -30,22 +35,36 @@ public:
         if (nextState) delete nextState;
     }
 
+    // Manualne wyczyszczenie zanim wyłączy się silnik Raylib
+    void Shutdown() {
+        if (currentState) {
+            delete currentState;
+            currentState = nullptr;
+        }
+        if (nextState) {
+            delete nextState;
+            nextState = nullptr;
+        }
+    }
+
+    bool IsTransitioning() const { return transitioning; }
+
 	// Powiadamia, aby zmienić state w następnej klatce
     void ChangeState(GameState* newState) {
-        if (transitioning) {
-            delete newState;
+        if (transitioning || newState == nullptr) {
+            if (newState) delete newState;
             return;
         }
         nextState = newState;
         transitioning = true;
-        transTimer = 0.0f;
+        transitionTimer = 0.0f;
         stateSwapped = false;
     }
 
     // Obsluguje zmianę state-ów i usuwa stare w bezpiecznym czasie (następna klatka)
     void ProcessStateChange() {
         // Wykonaj zamianę stanów w połowie animacji (gdy ekran jest w pełni zakryty)
-        if (transitioning && !stateSwapped && transTimer >= transDuration / 2.0f) {
+        if (transitioning && !stateSwapped && transitionTimer >= TRANSITION_DURATION * MID_TRANSITION_THRESHOLD) {
             if (currentState) delete currentState;
             currentState = nextState;
             nextState = nullptr;
@@ -61,38 +80,35 @@ public:
         }
     }
 
-    void Update(float dt, country* country_ptr) {
+    void Update(float deltatime, country* country_ptr) {
         if (transitioning) {
-            transTimer += dt;
-            if (transTimer >= transDuration) {
+            transitionTimer += deltatime;
+            if (transitionTimer >= TRANSITION_DURATION) {
                 transitioning = false;
-                transTimer = 0.0f;
+                transitionTimer = 0.0f;
             }
         }
-        if (currentState) currentState->Update(dt, country_ptr);
+        if (currentState && !transitioning) currentState->Update(deltatime, country_ptr);
     }
 
     void Draw() {
         if (currentState) currentState->Draw();
 
         if (transitioning) {
-            float sw = (float)GetScreenWidth();
-            float sh = (float)GetScreenHeight();
-            float gh = 180.0f; // Wysokość gradientu na krawędzi
-            float progress = transTimer / transDuration;
+            float progress = transitionTimer / TRANSITION_DURATION;
 
-            if (progress <= 0.5f) {
+            if (progress <= MID_TRANSITION_THRESHOLD) {
                 // Faza 1: Zasłanianie od góry
-                float t = progress * 2.0f; // 0.0 -> 1.0
-                float y = t * sh;
-                DrawRectangle(0, 0, (int)sw, (int)y, BLACK);
-                DrawRectangleGradientV(0, (int)y, (int)sw, (int)gh, BLACK, BLANK);
+                float normalizedPhase = PHASE_OFFSET + (progress * ANIMATION_SPEED_SCALE);
+                float curtainY = normalizedPhase * Config::SCREEN_HEIGHT;
+                DrawRectangle(0, 0, Config::SCREEN_WIDTH, (int)curtainY, BLACK);
+                DrawRectangleGradientV(0, (int)curtainY, Config::SCREEN_WIDTH, (int)GRADIENT_HEIGHT, BLACK, BLANK);
             } else {
                 // Faza 2: Odsłanianie (górna krawędź "kurtyny" zjeżdża w dół)
-                float t = (progress - 0.5f) * 2.5f; // 0.0 -> 1.0
-                float y = t * sh;
-                DrawRectangle(0, (int)y, (int)sw, (int)(sh - y), BLACK);
-                DrawRectangleGradientV(0, (int)(y - gh), (int)sw, (int)gh, BLANK, BLACK);
+                float normalizedPhase = (progress - MID_TRANSITION_THRESHOLD) * ANIMATION_SPEED_SCALE;
+                float curtainY = normalizedPhase * Config::SCREEN_HEIGHT;
+                DrawRectangle(0, (int)curtainY, Config::SCREEN_WIDTH, (int)(Config::SCREEN_HEIGHT - curtainY), BLACK);
+                DrawRectangleGradientV(0, (int)(curtainY - GRADIENT_HEIGHT), Config::SCREEN_WIDTH, (int)GRADIENT_HEIGHT, BLANK, BLACK);
             }
         }
     }

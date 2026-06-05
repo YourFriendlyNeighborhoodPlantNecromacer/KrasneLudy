@@ -8,3 +8,4 @@ main
 /GLUGLU/functions/tests/*.exe
 resounts2.txt
 save_file_*.txt
+settings.cfg
