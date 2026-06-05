@@ -39,8 +39,8 @@ namespace Config {
 
     const std::string ASSET_PATH = "assets";
 
-    constexpr float MAP_HALF = 1000.0f;
-    constexpr float MAP_SIZE = MAP_HALF * 2.0f;
+    inline float MAP_HALF = 1000.0f;
+    inline float MAP_SIZE = 2000.0f;
 
     const std::map<NamedValues::material, Color> MATERIAL_COLORS = {
         {NamedValues::material::plants, Color{40, 212, 104, 255}},

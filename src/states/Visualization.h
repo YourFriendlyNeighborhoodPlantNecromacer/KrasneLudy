@@ -58,13 +58,13 @@ static inline void DrawCountryEntities(const country* c) {
         for(int64_t i = 0; i <= workplaces[material_type].get_last_index(); i++) {
             const auto& wp = workplaces[material_type][i];
             if(!wp) continue;
-            DrawWorkplaceMarker((float)wp->coordinates[NamedValues::axis::X], (float)wp->coordinates[NamedValues::axis::Y], fill);
+            DrawWorkplaceMarker((float)wp->coordinates[NamedValues::axis::X] * Config::MAP_HALF, (float)wp->coordinates[NamedValues::axis::Y] * Config::MAP_HALF, fill);
         }
 
         for(int64_t i = 0; i <= houses[material_type].get_last_index(); i++) {
             const auto& housePtr = houses[material_type][i];
             if(!housePtr) continue;
-            DrawHouseMarker((float)housePtr->coordinates[NamedValues::axis::X], (float)housePtr->coordinates[NamedValues::axis::Y], fill);
+            DrawHouseMarker((float)housePtr->coordinates[NamedValues::axis::X] * Config::MAP_HALF, (float)housePtr->coordinates[NamedValues::axis::Y] * Config::MAP_HALF, fill);
         }
     }
 }
@@ -81,9 +81,11 @@ class Visualization : public GameState {
 
     Rectangle btnBack = { 0 };
     Rectangle btnLoad = { 0 };
+    Rectangle sliderMapSize = { 0 };
 
     int selectedItem = -1;
     int lastSelectedItem = 0;
+    bool isDraggingSlider = false;
 
     Visualization(country* map_pointer) : map_pointer(map_pointer) {}
 
@@ -107,6 +109,7 @@ class Visualization : public GameState {
 
         btnBack = { viewportArea.x, viewportArea.y + viewportArea.height + 20.0f, 200, 40 };
         btnLoad = { viewportArea.x, btnBack.y + btnBack.height + 10.0f, 200, 40 };
+        sliderMapSize = { btnBack.x + 240.0f, btnBack.y + 15.0f, 300, 10 };
 
         // Create a small test data file for the country and load it
 
@@ -161,11 +164,26 @@ class Visualization : public GameState {
         Vector2 mouse = GetMousePosition();
         if (CheckCollisionPointRec(mouse, btnBack)) selectedItem = 0;
         else if (CheckCollisionPointRec(mouse, btnLoad)) selectedItem = 1;
+        else if (CheckCollisionPointRec(mouse, sliderMapSize)) selectedItem = 2;
         else selectedItem = -1;
 
-        if (CheckCollisionPointRec(mouse, btnBack) || CheckCollisionPointRec(mouse, btnLoad)) {
+        if (selectedItem != -1 || isDraggingSlider) {
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         } else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && selectedItem == 2) {
+            isDraggingSlider = true;
+        }
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+            isDraggingSlider = false;
+        }
+
+        if (isDraggingSlider) {
+            float mouseX = std::max(sliderMapSize.x, std::min(GetMousePosition().x, sliderMapSize.x + sliderMapSize.width));
+            float progress = (mouseX - sliderMapSize.x) / sliderMapSize.width;
+            Config::MAP_SIZE = 500.0f + progress * 9500.0f; // Zakres od 500 do 10000
+            Config::MAP_HALF = Config::MAP_SIZE / 2.0f;
+        }
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mouse, btnBack)) {
@@ -197,9 +215,15 @@ class Visualization : public GameState {
         UI::DrawMenuButton(btnBack, "WYJDŹ", customFont, Color{(148),(0),(0),(255)}, Color{(196),(0),(0),(255)});
         UI::DrawMenuButton(btnLoad, "ŁADUJ GRAF", customFont);
 
+        // Rysowanie Slidera
+        DrawRectangleRec(sliderMapSize, DARKGRAY);
+        float progress = (Config::MAP_SIZE - 500.0f) / 9500.0f;
+        DrawRectangleV({ sliderMapSize.x + progress * sliderMapSize.width - 10, sliderMapSize.y - 10 }, { 20, 30 }, RAYWHITE);
+        DrawTextEx(customFont, TextFormat("ROZMIAR MAPY: %.0f", Config::MAP_SIZE), { sliderMapSize.x, sliderMapSize.y + 25 }, 20, 0, RAYWHITE);
+
         if (selectedItem != -1) {
-            Rectangle r = (selectedItem == 0) ? btnBack : btnLoad;
-            DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, Color{(96),(96),(0),(255)});
+            Rectangle r = (selectedItem == 0) ? btnBack : (selectedItem == 1 ? btnLoad : sliderMapSize);
+            DrawRectangleLinesEx({ r.x - 5, r.y - 5, r.width + 10, r.height + 10 }, 2, Color{96, 96, 0, 255});
         }
 
         DrawRectangleLinesEx(viewportArea, 3, RAYWHITE);

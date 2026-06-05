@@ -106,10 +106,14 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
+            double nx = (x * 2.0 - 1.0);
+            double ny = (y * 2.0 - 1.0);
+            double nz = (z * 2.0 - 1.0);
+
             std::getline(ss, token, ';');
             int64_t capacity = static_cast<int64_t>(std::stoll(token));
 
-            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, x, y, z, static_cast<NamedValues::material>(material_type), capacity));
+            workplaces[material_type].append(std::make_unique<workplace>(workplace_index, nx, ny, nz, static_cast<NamedValues::material>(material_type), capacity));
             workplace_index++;
         }
     }
@@ -139,7 +143,11 @@ bool country::construct_from_file(const std::string &file_name){
             std::getline(ss, token, ';');
             double z = std::stod(token);
 
-            houses[material_type].append(std::make_unique<house>(house_index, x, y, z, static_cast<NamedValues::material>(material_type)));
+            double nx = (x * 2.0 - 1.0);
+            double ny = (y * 2.0 - 1.0);
+            double nz = (z * 2.0 - 1.0);
+
+            houses[material_type].append(std::make_unique<house>(house_index, nx, ny, nz, static_cast<NamedValues::material>(material_type)));
             house_index++;
         }
     }
