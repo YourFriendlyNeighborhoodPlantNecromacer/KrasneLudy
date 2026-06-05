@@ -6,3 +6,5 @@ main
 /GLUGLU/functions/tests/*.bin
 /GLUGLU/functions/tests/*.o
 /GLUGLU/functions/tests/*.exe
+resounts2.txt
+save_file_*.txt
