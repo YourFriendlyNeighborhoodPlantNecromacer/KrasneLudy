@@ -19,7 +19,7 @@ void render_and_graphics(country& kingdom, float screenWidth, float screenHeight
     SetExitKey(KEY_NULL);
     InitAudioDevice();
 
-    // Apply settings to game
+    // Zastosuj ustawienia do gry
     SettingsManager::Instance().GetSettings().ApplyToGame();
 
     // Ładowanie globalnych zasobów audio

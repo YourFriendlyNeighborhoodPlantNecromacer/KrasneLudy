@@ -5,13 +5,13 @@
 
 class GameState {
 public:
-	// Usuwanie
+	// Usuwanie stanu
 	virtual ~GameState() {};
 
-	// Tworzenie tuż po tworzeniu state-a
+	// Inicjalizacja tuż po stworzeniu stanu
 	virtual void Init() = 0;
 
-	// Aktualizacja (głównie do logiki) i rysowanie (osobno)
+	// Aktualizacja (głównie logika) i rysowanie (oddzielnie)
 	virtual void Update(float deltaTime, country* countryPtr) = 0;
 	virtual void Draw() = 0;
 };

@@ -10,7 +10,7 @@ private:
     GameState* currentState = nullptr;
     GameState* nextState = nullptr;
 
-    // Logika przejścia (Transition)
+    // Logika przejścia
     float transitionTimer = 0.0f;
     bool transitioning = false;
     bool stateSwapped = false;
@@ -49,7 +49,7 @@ public:
 
     bool IsTransitioning() const { return transitioning; }
 
-	// Powiadamia, aby zmienić state w następnej klatce
+	// Powiadamia o zmianie stanu w następnej klatce
     void ChangeState(GameState* newState) {
         if (transitioning || newState == nullptr) {
             if (newState) delete newState;
@@ -61,7 +61,7 @@ public:
         stateSwapped = false;
     }
 
-    // Obsluguje zmianę state-ów i usuwa stare w bezpiecznym czasie (następna klatka)
+    // Obsługuje zmianę stanów i usuwa stare w bezpiecznym czasie (następna klatka)
     void ProcessStateChange() {
         // Wykonaj zamianę stanów w połowie animacji (gdy ekran jest w pełni zakryty)
         if (transitioning && !stateSwapped && transitionTimer >= TRANSITION_DURATION * MID_TRANSITION_THRESHOLD) {
@@ -113,7 +113,7 @@ public:
         }
     }
 
-	// Nie zezwalać na kopiowanie
+	// Nie zezwalaj na kopiowanie
     StateManager(const StateManager&) = delete;
     void operator=(const StateManager&) = delete;
 };
