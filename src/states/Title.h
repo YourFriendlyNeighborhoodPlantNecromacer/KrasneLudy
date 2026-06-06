@@ -26,15 +26,14 @@ class Title : public GameState {
     static constexpr float LOGO_SWAY_AMPLITUDE = 15.0f;
     static constexpr float LOGO_SWAY_SPEED = 2.0f;
     static constexpr float LOGO_SCALE = 1.5f;
-    static constexpr float BUTTON_WIDTH = 200.0f;
-    static constexpr float BUTTON_HEIGHT = 40.0f;
     static constexpr float BUTTON_START_Y_OFFSET = 20.0f;
     static constexpr float BUTTON_SPACING = 50.0f;
     static constexpr float UI_MARGIN = 5.0f;
-    static constexpr float FOOTER_TEXT_SIZE = 20.0f;
-    static constexpr float MENU_FONT_SIZE = 40.0f;
 
-    country* country_ptr;
+    static constexpr float LOGO_Y_OFFSET_DRAW = 50.0f;
+    static constexpr float FOOTER_MARGIN = 10.0f;
+
+    country* countryPtr;
     Texture2D backgroundTexture;
     Texture2D mainLogoTexture;
     Texture2D universityLogoTexture;
@@ -50,8 +49,8 @@ class Title : public GameState {
     UI::Button btnExit;
     UI::Button btnUmk;
 
-    Title(country* country_ptr)
-        : country_ptr(country_ptr), backgroundTexture{0}, mainLogoTexture{0},
+    Title(country* countryPtr)
+        : countryPtr(countryPtr), backgroundTexture{0}, mainLogoTexture{0},
           universityLogoTexture{0}, menuFont{0} {}
 
     void Init() override {
@@ -68,26 +67,26 @@ class Title : public GameState {
         SetTextureFilter(mainLogoTexture, TEXTURE_FILTER_POINT);
         UnloadImage(main_img);
 
-        menuFont = UI::LoadStandardFont(MENU_FONT_SIZE);
+        menuFont = UI::LoadStandardFont(UI::HEADER_FONT_SIZE);
 
         float centerX = Config::SCREEN_WIDTH / 2.0f;
-        float buttonX = centerX - (BUTTON_WIDTH / 2.0f);
+        float buttonX = centerX - (UI::BUTTON_WIDTH / 2.0f);
         float startY = Config::SCREEN_HEIGHT / 2.0f + BUTTON_START_Y_OFFSET;
 
-        btnVis     = UI::Button({ buttonX, startY, BUTTON_WIDTH, BUTTON_HEIGHT }, "WIZUALIZACJA", menuFont);
-        btnOptions = UI::Button({ buttonX, startY + (1 * BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT }, "OPCJE", menuFont);
-        btnCredits = UI::Button({ buttonX, startY + (2 * BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT }, "TWÓRCY", menuFont);
-        btnExit    = UI::Button({ buttonX, startY + (3 * BUTTON_SPACING), BUTTON_WIDTH, BUTTON_HEIGHT }, "WYJŚCIE", menuFont);
+        btnVis     = UI::Button({ buttonX, startY, UI::BUTTON_WIDTH, UI::BUTTON_HEIGHT }, "WIZUALIZACJA", menuFont);
+        btnOptions = UI::Button({ buttonX, startY + (1 * BUTTON_SPACING), UI::BUTTON_WIDTH, UI::BUTTON_HEIGHT }, "OPCJE", menuFont);
+        btnCredits = UI::Button({ buttonX, startY + (2 * BUTTON_SPACING), UI::BUTTON_WIDTH, UI::BUTTON_HEIGHT }, "TWÓRCY", menuFont);
+        btnExit    = UI::Button({ buttonX, startY + (3 * BUTTON_SPACING), UI::BUTTON_WIDTH, UI::BUTTON_HEIGHT }, "WYJŚCIE", menuFont);
 
         btnUmk = UI::Button({ UI_MARGIN, (float)Config::SCREEN_HEIGHT - universityLogoTexture.height - UI_MARGIN, (float)universityLogoTexture.width, (float)universityLogoTexture.height }, "", menuFont, BLANK, BLANK, WHITE, BLANK, 20, 0.0f);
     }
 
-    void Update(float deltatime, country* country_ptr) override;
+    void Update(float deltaTime, country* countryPtr) override;
 
-    void ExecuteMenuAction(int index, country* country_ptr) {
+    void ExecuteMenuAction(int index, country* countryPtr) {
         UI::PlaySelectSound();
         switch (static_cast<MenuOption>(index)) {
-            case MenuOption::VISUALIZATION: StateManager::Instance().ChangeState(new Visualization(country_ptr)); break;
+            case MenuOption::VISUALIZATION: StateManager::Instance().ChangeState(new Visualization(countryPtr)); break;
             case MenuOption::OPTIONS:       StateManager::Instance().ChangeState(new Options()); break;
             case MenuOption::CREDITS:       StateManager::Instance().ChangeState(new Credits()); break;
             case MenuOption::EXIT:          exit(0); break;
@@ -103,7 +102,7 @@ class Title : public GameState {
         float swayX = sinf(GetTime() * LOGO_SWAY_SPEED) * LOGO_SWAY_AMPLITUDE;
         float centerX = (Config::SCREEN_WIDTH / 2.0f) - (mainLogoTexture.width / 2.0f);
 
-        DrawTexture(mainLogoTexture, centerX + swayX, posY - 50, Fade(WHITE, alpha));
+        DrawTexture(mainLogoTexture, centerX + swayX, posY - LOGO_Y_OFFSET_DRAW, Fade(WHITE, alpha));
 
         btnVis.Draw();
         btnOptions.Draw();
@@ -117,13 +116,13 @@ class Title : public GameState {
         else if (selectedItem == 2) selectionRect = btnCredits.bounds;
         else selectionRect = btnExit.bounds;
 
-        DrawRectangleLinesEx({ selectionRect.x - 5, selectionRect.y - 5, selectionRect.width + 10, selectionRect.height + 10 }, 2, Color{96, 96, 0, 255});
+        DrawRectangleLinesEx({ selectionRect.x - UI::SELECTOR_PADDING, selectionRect.y - UI::SELECTOR_PADDING, selectionRect.width + UI::SELECTOR_PADDING * 2.0f, selectionRect.height + UI::SELECTOR_PADDING * 2.0f }, 2, Color{96, 96, 0, 255});
 
         DrawTexture(universityLogoTexture, UI_MARGIN, Config::SCREEN_HEIGHT - universityLogoTexture.height - UI_MARGIN, WHITE);
 
         const char* yearText = "2026";
-        Vector2 yearSize = MeasureTextEx(menuFont, yearText, FOOTER_TEXT_SIZE, 2);
-        DrawTextEx(menuFont, yearText, { (float)Config::SCREEN_WIDTH - yearSize.x - 10, (float)Config::SCREEN_HEIGHT - yearSize.y - 10 }, FOOTER_TEXT_SIZE, 2, GRAY);
+        Vector2 yearSize = MeasureTextEx(menuFont, yearText, UI::NORMAL_FONT_SIZE, UI::FONT_SPACING_HEADER);
+        DrawTextEx(menuFont, yearText, { (float)Config::SCREEN_WIDTH - yearSize.x - FOOTER_MARGIN, (float)Config::SCREEN_HEIGHT - yearSize.y - FOOTER_MARGIN }, UI::NORMAL_FONT_SIZE, UI::FONT_SPACING_HEADER, GRAY);
     }
 
     ~Title() {
@@ -134,8 +133,8 @@ class Title : public GameState {
     }
 };
 
-inline void Title::Update(float deltatime, country* country_ptr) {
-    introTimer += deltatime;
+inline void Title::Update(float deltaTime, country* countryPtr) {
+    introTimer += deltaTime;
     int totalItems = static_cast<int>(MenuOption::size);
 
     if (IsKeyPressed(KEY_UP)) selectedItem = (selectedItem + totalItems - 1) % totalItems;
@@ -164,21 +163,21 @@ inline void Title::Update(float deltatime, country* country_ptr) {
 
     // Skrócone wykonanie akcji
     if (IsKeyPressed(KEY_ENTER)) {
-        ExecuteMenuAction(selectedItem, country_ptr);
+        ExecuteMenuAction(selectedItem, countryPtr);
     } else if (umkClicked) {
         UI::PlaySelectSound();
         OpenURL("https://www.umk.pl/");
     } else {
         for (int i = 0; i < totalItems; i++) {
-            if (clicked[i]) ExecuteMenuAction(i, country_ptr);
+            if (clicked[i]) ExecuteMenuAction(i, countryPtr);
         }
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) exit(0);
 }
 
-inline void GoToTitle(country* country_ptr) {
-    StateManager::Instance().ChangeState(new Title(country_ptr));
+inline void GoToTitle(country* countryPtr) {
+    StateManager::Instance().ChangeState(new Title(countryPtr));
 }
 
 #endif // STATE_TITLE_H

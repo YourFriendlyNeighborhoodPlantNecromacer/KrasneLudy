@@ -10,7 +10,7 @@
 #include "../backend/classes/Button.h"
 
 // Deklaracja wyprzedzająca
-inline void GoToTitle(country* country_ptr);
+inline void GoToTitle(country* countryPtr);
 
 class Options : public GameState {
 public:
@@ -26,6 +26,29 @@ public:
     static constexpr float AUDIO_BTN_SIZE = 35.0f;
     static constexpr float VOLUME_STEP = 0.1f;
 
+    static constexpr float RESET_BTN_WIDTH = 200.0f;
+    static constexpr float RESET_BTN_X_OFFSET = 220.0f;
+    static constexpr float CONFIRM_BTN_WIDTH = 100.0f;
+    static constexpr float CONFIRM_BTN_X_OFFSET = 120.0f;
+    static constexpr float CONFIRM_BTN_Y_OFFSET = 40.0f;
+    static constexpr float AUDIO_MINUS_X_OFFSET = 165.0f;
+    static constexpr float AUDIO_PLUS_X_OFFSET = 315.0f;
+    static constexpr float AUDIO_BAR_X_OFFSET = 205.0f;
+    static constexpr float AUDIO_BAR_WIDTH = 100.0f;
+    static constexpr float AUDIO_BAR_HEIGHT = 15.0f;
+    static constexpr float AUDIO_SELECTOR_WIDTH = 355.0f;
+    static constexpr float DIALOG_WIDTH = 400.0f;
+    static constexpr float DIALOG_HEIGHT = 200.0f;
+    static constexpr float DIALOG_TITLE_Y_OFFSET = 30.0f;
+    static constexpr float DIALOG_MSG_X_OFFSET = 20.0f;
+    static constexpr float DIALOG_MSG_Y_OFFSET = 70.0f;
+    static constexpr float ITEM_TEXT_X_OFFSET = 10.0f;
+    static constexpr float ITEM_TEXT_Y_OFFSET = 8.0f;
+    static constexpr float HEADER_Y = 20.0f;
+    static constexpr float DIALOG_TITLE_SIZE = 24.0f;
+    static constexpr float DIALOG_MSG_SIZE = 16.0f;
+    static constexpr unsigned char OVERLAY_ALPHA = 150;
+
     // Zakresy indeksów wyboru
     static constexpr int IDX_DISPLAY_START = 0;
     static constexpr int DISPLAY_OPTIONS_COUNT = 3;
@@ -37,9 +60,6 @@ public:
     static constexpr int MISC_OPTIONS_COUNT = 2;
 
     // Stylizacja interfejsu użytkownika
-    static constexpr float HEADER_FONT_SIZE = 30.0f;
-    static constexpr float NORMAL_FONT_SIZE = 20.0f;
-
     Texture2D backgroundTexture;
     Font headerFont;
     Font normalFont;
@@ -62,16 +82,16 @@ public:
 
     void Init() override {
         backgroundTexture = LoadTexture(UI::AssetPath(UI::GetBackgroundPath()));
-        headerFont = UI::LoadStandardFont(HEADER_FONT_SIZE);
-        normalFont = UI::LoadStandardFont(NORMAL_FONT_SIZE);
+        headerFont = UI::LoadStandardFont(UI::SUBHEADER_FONT_SIZE);
+        normalFont = UI::LoadStandardFont(UI::NORMAL_FONT_SIZE);
 
         // Ładuj z pliku
         SettingsManager::Instance().LoadSettings();
 
-        btnBack = UI::Button({20, 20, 40, 40}, "X", headerFont, MAROON, RED, WHITE, BLACK, 25, 0.0f);
-        btnReset = UI::Button({Config::SCREEN_WIDTH - 220, 20, 200, 40}, "RESETUJ USTAWIENIA", normalFont);
-        btnResetConfirmYes = UI::Button({Config::SCREEN_WIDTH / 2 - 120, Config::SCREEN_HEIGHT / 2 + 40, 100, 40}, "TAK", headerFont);
-        btnResetConfirmNo = UI::Button({Config::SCREEN_WIDTH / 2 + 20, Config::SCREEN_HEIGHT / 2 + 40, 100, 40}, "NIE", headerFont);
+        btnBack = UI::Button({UI::UI_MARGIN, UI::UI_MARGIN, UI::BACK_BTN_SIZE, UI::BACK_BTN_SIZE}, "X", headerFont, MAROON, RED, WHITE, BLACK, UI::LABEL_FONT_SIZE, 0.0f);
+        btnReset = UI::Button({Config::SCREEN_WIDTH - RESET_BTN_X_OFFSET, UI::UI_MARGIN, RESET_BTN_WIDTH, UI::BACK_BTN_SIZE}, "RESETUJ USTAWIENIA", normalFont);
+        btnResetConfirmYes = UI::Button({Config::SCREEN_WIDTH / 2.0f - CONFIRM_BTN_X_OFFSET, Config::SCREEN_HEIGHT / 2.0f + CONFIRM_BTN_Y_OFFSET, CONFIRM_BTN_WIDTH, UI::BACK_BTN_SIZE}, "TAK", headerFont);
+        btnResetConfirmNo = UI::Button({Config::SCREEN_WIDTH / 2.0f + UI::UI_MARGIN, Config::SCREEN_HEIGHT / 2.0f + CONFIRM_BTN_Y_OFFSET, CONFIRM_BTN_WIDTH, UI::BACK_BTN_SIZE}, "NIE", headerFont);
 
         // Powstawianie opcji dla różnych sekcji
         for (int i = 0; i < DISPLAY_OPTIONS_COUNT; i++)
@@ -79,8 +99,8 @@ public:
 
         for (int i = 0; i < AUDIO_OPTIONS_COUNT; i++) {
             float y = (DISPLAY_SECTION_Y + LIST_START_Y_OFFSET) + (i * ITEM_HEIGHT_SPACING);
-            audioButtons.emplace_back(Rectangle{AUDIO_SECTION_OFFSET_X + 165, y, AUDIO_BTN_SIZE, AUDIO_BTN_SIZE}, "-", normalFont, DARKBLUE, BLUE, WHITE, BLACK, 20, 0.0f);
-            audioButtons.emplace_back(Rectangle{AUDIO_SECTION_OFFSET_X + 315, y, AUDIO_BTN_SIZE, AUDIO_BTN_SIZE}, "+", normalFont, DARKBLUE, BLUE, WHITE, BLACK, 20, 0.0f);
+            audioButtons.emplace_back(Rectangle{AUDIO_SECTION_OFFSET_X + AUDIO_MINUS_X_OFFSET, y, AUDIO_BTN_SIZE, AUDIO_BTN_SIZE}, "-", normalFont, DARKBLUE, BLUE, WHITE, BLACK, 20, 0.0f);
+            audioButtons.emplace_back(Rectangle{AUDIO_SECTION_OFFSET_X + AUDIO_PLUS_X_OFFSET, y, AUDIO_BTN_SIZE, AUDIO_BTN_SIZE}, "+", normalFont, DARKBLUE, BLUE, WHITE, BLACK, 20, 0.0f);
         }
 
         for (int i = 0; i < MISC_OPTIONS_COUNT; i++)
@@ -98,7 +118,7 @@ public:
         SettingsManager::Instance().SaveSettings();
     }
 
-    void Update(float deltatime, country* country_ptr) override {
+    void Update(float deltaTime, country* countryPtr) override {
         // Dialog resetowanie ustawień
         if (showResetConfirmDialog) {
             if (btnResetConfirmYes.Update() || IsKeyPressed(KEY_Y)) {
@@ -123,7 +143,7 @@ public:
         if (btnBack.Update() || IsKeyReleased(KEY_ESCAPE)) {
             UI::PlaySelectSound();
             SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-            GoToTitle(country_ptr);
+            GoToTitle(countryPtr);
             return;
         }
 
@@ -217,7 +237,7 @@ public:
     void Draw() override {
         UI::DrawTiledBackground(backgroundTexture);
         const char* titleText = "OPCJE APLIKACJI";
-        DrawTextEx(headerFont, titleText, {(Config::SCREEN_WIDTH - MeasureTextEx(headerFont, titleText, HEADER_FONT_SIZE, 2).x) / 2, 20}, HEADER_FONT_SIZE, 2, DARKGRAY);
+        DrawTextEx(headerFont, titleText, {(Config::SCREEN_WIDTH - MeasureTextEx(headerFont, titleText, UI::HEADER_FONT_SIZE, UI::FONT_SPACING_HEADER).x) / 2, HEADER_Y}, UI::HEADER_FONT_SIZE, UI::FONT_SPACING_HEADER, DARKGRAY);
 
         if (showResetConfirmDialog) {
             DrawResetConfirmDialog();
@@ -232,22 +252,20 @@ public:
     }
 
     void DrawResetConfirmDialog() {
-        DrawRectangle(0, 0, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, Color{0, 0, 0, 150});
+        DrawRectangle(0, 0, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, Fade(BLACK, (float)OVERLAY_ALPHA / 255.0f));
 
-        float dialogWidth = 400;
-        float dialogHeight = 200;
-        float dialogX = (Config::SCREEN_WIDTH - dialogWidth) / 2;
-        float dialogY = (Config::SCREEN_HEIGHT - dialogHeight) / 2;
+        float dialogX = (Config::SCREEN_WIDTH - DIALOG_WIDTH) / 2.0f;
+        float dialogY = (Config::SCREEN_HEIGHT - DIALOG_HEIGHT) / 2.0f;
 
-        DrawRectangleRec({dialogX, dialogY, dialogWidth, dialogHeight}, DARKGRAY);
-        DrawRectangleLinesEx({dialogX, dialogY, dialogWidth, dialogHeight}, 2, GOLD);
+        DrawRectangleRec({dialogX, dialogY, DIALOG_WIDTH, DIALOG_HEIGHT}, DARKGRAY);
+        DrawRectangleLinesEx({dialogX, dialogY, DIALOG_WIDTH, DIALOG_HEIGHT}, UI::SELECTOR_THICKNESS, GOLD);
 
         const char* titleText = "RESETOWAĆ USTAWIENIA?";
-        Vector2 titleSize = MeasureTextEx(headerFont, titleText, 24, 1);
-        DrawTextEx(headerFont, titleText, {dialogX + (dialogWidth - titleSize.x) / 2, dialogY + 30}, 24, 1, WHITE);
+        Vector2 titleSize = MeasureTextEx(headerFont, titleText, DIALOG_TITLE_SIZE, UI::FONT_SPACING_NORMAL);
+        DrawTextEx(headerFont, titleText, {dialogX + (DIALOG_WIDTH - titleSize.x) / 2.0f, dialogY + DIALOG_TITLE_Y_OFFSET}, DIALOG_TITLE_SIZE, UI::FONT_SPACING_NORMAL, WHITE);
 
         const char* msgText = "Wszystkie ustawienia zostaną przywrócone\ndo wartości domyślnych.";
-        DrawTextEx(normalFont, msgText, {dialogX + 20, dialogY + 70}, 16, 1, RAYWHITE);
+        DrawTextEx(normalFont, msgText, {dialogX + DIALOG_MSG_X_OFFSET, dialogY + DIALOG_MSG_Y_OFFSET}, DIALOG_MSG_SIZE, UI::FONT_SPACING_NORMAL, RAYWHITE);
 
         btnResetConfirmYes.Draw();
         btnResetConfirmNo.Draw();
@@ -257,7 +275,7 @@ public:
         const GameSettings& settings = SettingsManager::Instance().GetSettings();
         float startX = SECTION_OFFSET_X, startY = DISPLAY_SECTION_Y;
         bool isSectionActive = (selectedItem >= IDX_DISPLAY_START && selectedItem < IDX_DISPLAY_START + DISPLAY_OPTIONS_COUNT);
-        DrawTextEx(headerFont, "USTAWIENIA WYŚWIETLANIA:", {startX, startY}, 20, 1, isSectionActive ? YELLOW : DARKGRAY);
+        DrawTextEx(headerFont, "USTAWIENIA WYŚWIETLANIA:", {startX, startY}, 20, UI::FONT_SPACING_NORMAL, isSectionActive ? YELLOW : DARKGRAY);
 
         const char* labels[] = {"Tryb Okna", "VSync", "Limit FPS"};
 
@@ -276,7 +294,7 @@ public:
             if (!isGrayed) displayButtons[i].Draw();
             else DrawRectangleRec(displayButtons[i].bounds, Color{40, 40, 40, 100}); // Tło dla zablokowanego przycisku
 
-            DrawTextEx(normalFont, TextFormat("%s: %s", labels[i], values[i]), {startX + 10, (startY + LIST_START_Y_OFFSET) + (i * ITEM_HEIGHT_SPACING) + 8}, 18, 1, itemColor);
+            DrawTextEx(normalFont, TextFormat("%s: %s", labels[i], values[i]), {startX + ITEM_TEXT_X_OFFSET, (startY + LIST_START_Y_OFFSET) + (i * ITEM_HEIGHT_SPACING) + ITEM_TEXT_Y_OFFSET}, UI::LIST_ITEM_FONT_SIZE, UI::FONT_SPACING_NORMAL, itemColor);
         }
     }
 
@@ -284,7 +302,7 @@ public:
         const GameSettings& settings = SettingsManager::Instance().GetSettings();
         float startX = AUDIO_SECTION_OFFSET_X, startY = DISPLAY_SECTION_Y;
         bool isSectionActive = (selectedItem >= IDX_AUDIO_START && selectedItem < IDX_AUDIO_START + AUDIO_OPTIONS_COUNT);
-        DrawTextEx(headerFont, "USTAWIENIA AUDIO:", {startX, startY}, 20, 1, isSectionActive ? YELLOW : DARKGRAY);
+        DrawTextEx(headerFont, "USTAWIENIA AUDIO:", {startX, startY}, 20, UI::FONT_SPACING_NORMAL, isSectionActive ? YELLOW : DARKGRAY);
 
         const char* labels[] = {"Główna Głośność", "Głośność Muzyki", "Głośność Dźwięków"};
         float values[] = { settings.masterVolume, settings.musicVolume, settings.sfxVolume };
@@ -292,8 +310,8 @@ public:
         for (int i = 0; i < AUDIO_OPTIONS_COUNT; i++) {
             float rowY = (startY + LIST_START_Y_OFFSET) + (i * ITEM_HEIGHT_SPACING);
             int globalIdx = i + IDX_AUDIO_START;
-            DrawTextEx(normalFont, TextFormat("%s: %.0f%%", labels[i], values[i] * 100), {startX, rowY + 8}, 18, 1, (selectedItem == globalIdx) ? RAYWHITE : BLACK);
-            DrawVolumeBar(startX + 205, rowY + 10, values[i]);
+            DrawTextEx(normalFont, TextFormat("%s: %.0f%%", labels[i], values[i] * 100.0f), {startX, rowY + ITEM_TEXT_Y_OFFSET}, UI::LIST_ITEM_FONT_SIZE, UI::FONT_SPACING_NORMAL, (selectedItem == globalIdx) ? RAYWHITE : BLACK);
+            DrawVolumeBar(startX + AUDIO_BAR_X_OFFSET, rowY + ITEM_TEXT_X_OFFSET, values[i]);
             audioButtons[i * 2].Draw();
             audioButtons[i * 2 + 1].Draw();
         }
@@ -303,7 +321,7 @@ public:
         const GameSettings& settings = SettingsManager::Instance().GetSettings();
         float startX = SECTION_OFFSET_X, startY = MISC_SECTION_Y;
         bool isSectionActive = (selectedItem >= IDX_MISC_START && selectedItem < IDX_MISC_START + MISC_OPTIONS_COUNT);
-        DrawTextEx(headerFont, "INNE USTAWIENIA:", {startX, startY}, 20, 1, isSectionActive ? YELLOW : DARKGRAY);
+        DrawTextEx(headerFont, "INNE USTAWIENIA:", {startX, startY}, 20, UI::FONT_SPACING_NORMAL, isSectionActive ? YELLOW : DARKGRAY);
 
         const char* labels[] = {"Wyświetlaj FPS", "Tło Menu"};
         const char* bgTexts[] = {"Marmur", "Ciemne"};
@@ -312,24 +330,22 @@ public:
         for (int i = 0; i < MISC_OPTIONS_COUNT; i++) {
             int globalIdx = i + IDX_MISC_START;
             miscButtons[i].Draw();
-            DrawTextEx(normalFont, TextFormat("%s: %s", labels[i], values[i]), {startX + 10, (startY + LIST_START_Y_OFFSET) + (i * ITEM_HEIGHT_SPACING) + 8}, 18, 1, (selectedItem == globalIdx) ? RAYWHITE : BLACK);
+            DrawTextEx(normalFont, TextFormat("%s: %s", labels[i], values[i]), {startX + ITEM_TEXT_X_OFFSET, (startY + LIST_START_Y_OFFSET) + (i * ITEM_HEIGHT_SPACING) + ITEM_TEXT_Y_OFFSET}, UI::LIST_ITEM_FONT_SIZE, UI::FONT_SPACING_NORMAL, (selectedItem == globalIdx) ? RAYWHITE : BLACK);
         }
     }
 
     void DrawSelector() {
         Rectangle r = {0};
         if (selectedItem >= IDX_DISPLAY_START && selectedItem < IDX_DISPLAY_START + DISPLAY_OPTIONS_COUNT) r = displayButtons[selectedItem].bounds;
-        else if (selectedItem >= IDX_AUDIO_START && selectedItem < IDX_AUDIO_START + AUDIO_OPTIONS_COUNT) r = { audioButtons[(selectedItem - IDX_AUDIO_START) * 2].bounds.x - 165, audioButtons[(selectedItem - IDX_AUDIO_START) * 2].bounds.y, 355, BUTTON_HEIGHT };
+        else if (selectedItem >= IDX_AUDIO_START && selectedItem < IDX_AUDIO_START + AUDIO_OPTIONS_COUNT) r = { audioButtons[(selectedItem - IDX_AUDIO_START) * 2].bounds.x - AUDIO_MINUS_X_OFFSET, audioButtons[(selectedItem - IDX_AUDIO_START) * 2].bounds.y, AUDIO_SELECTOR_WIDTH, BUTTON_HEIGHT };
         else if (selectedItem >= IDX_MISC_START && selectedItem < IDX_MISC_START + MISC_OPTIONS_COUNT) r = miscButtons[selectedItem - IDX_MISC_START].bounds;
 
-        if (r.width > 0) DrawRectangleLinesEx({r.x - 5, r.y - 5, r.width + 10, r.height + 10}, 2, Color{96, 96, 0, 255});
+        if (r.width > 0) DrawRectangleLinesEx({r.x - UI::SELECTOR_PADDING, r.y - UI::SELECTOR_PADDING, r.width + UI::SELECTOR_PADDING * 2.0f, r.height + UI::SELECTOR_PADDING * 2.0f}, UI::SELECTOR_THICKNESS, Color{96, 96, 0, 255});
     }
 
     void DrawVolumeBar(float x, float y, float volume) {
-        float barWidth = 100;
-        float barHeight = 15;
-        DrawRectangleLines((int)x, (int)y, (int)barWidth, (int)barHeight, BLACK);
-        DrawRectangle((int)x, (int)y, (int)(barWidth * volume), (int)barHeight, DARKBLUE);
+        DrawRectangleLines((int)x, (int)y, (int)AUDIO_BAR_WIDTH, (int)AUDIO_BAR_HEIGHT, BLACK);
+        DrawRectangle((int)x, (int)y, (int)(AUDIO_BAR_WIDTH * volume), (int)AUDIO_BAR_HEIGHT, DARKBLUE);
     }
 
     ~Options() {
@@ -339,7 +355,7 @@ public:
     }
 };
 
-inline void GoToOptions(country* country_ptr) {
+inline void GoToOptions(country* countryPtr) {
     StateManager::Instance().ChangeState(new Options());
 }
 
