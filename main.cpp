@@ -61,7 +61,7 @@ void render_and_graphics(country& kingdom, float screenWidth, float screenHeight
 
 int main () {
     country kingdom_country;
-    generateCountry("save_file_1.txt", 1, 5, 10, 2, false, 1);
+    generateCountry("save_file_1.txt", 1, 1, 10, 20, false, 3);
     calculationsAndLogis(kingdom_country, "save_file_1.txt", "dwarf_workplace_assignment_file_1.txt", "rim_constructing_workplaces_file_1.txt");
     render_and_graphics(kingdom_country, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
 

@@ -213,7 +213,7 @@ std::unique_ptr<dynamicArray<couple<namedValues::material, int64_t>>> country::c
 void country::saveActiveWorkplaces(const std::unique_ptr<dynamicArray<couple<namedValues::material, int64_t>>> hull, const std::string saveFileName){
     std::ofstream saveFile(saveFileName);
     for(int i=0; i<=hull->getLastIndex(); i++){
-        saveFile << hull->at(i).valueA << ";" << hull->at(i).valueA << '\n';
+        saveFile << hull->at(i).valueA << ";" << hull->at(i).valueB << '\n';
     }
 }
 
