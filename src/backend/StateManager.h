@@ -80,15 +80,15 @@ public:
         }
     }
 
-    void Update(float deltatime, country* country_ptr) {
+    void Update(float deltaTime, country* countryPtr) {
         if (transitioning) {
-            transitionTimer += deltatime;
+            transitionTimer += deltaTime;
             if (transitionTimer >= TRANSITION_DURATION) {
                 transitioning = false;
                 transitionTimer = 0.0f;
             }
         }
-        if (currentState && !transitioning) currentState->Update(deltatime, country_ptr);
+        if (currentState && !transitioning) currentState->Update(deltaTime, countryPtr);
     }
 
     void Draw() {

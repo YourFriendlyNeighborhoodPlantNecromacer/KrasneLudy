@@ -6,7 +6,7 @@
 #include "../backend/UIHelpers.h"
 #include "../backend/classes/Button.h"
 
-inline void GoToTitle(country* country_ptr);
+inline void GoToTitle(country* countryPtr);
 
 class Credits : public GameState {
     public:
@@ -38,19 +38,19 @@ class Credits : public GameState {
         btnBack = UI::Button({ UI_MARGIN, UI_MARGIN, BACK_BTN_SIZE, BACK_BTN_SIZE }, "X", creditsFont, MAROON, RED, WHITE, BLACK, BACK_BTN_FONT_SIZE, 0.0f);
     }
 
-    void Update(float deltatime, country* country_ptr) override {
+    void Update(float deltaTime, country* countryPtr) override {
         if (btnBack.IsHovered()) {
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         } else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
         if (btnBack.Update()) {
             UI::PlaySelectSound();
-            GoToTitle(country_ptr);
+            GoToTitle(countryPtr);
         }
 
         if (IsKeyReleased(KEY_ESCAPE)) {
             UI::PlaySelectSound();
-            GoToTitle(country_ptr);
+            GoToTitle(countryPtr);
         }
     }
 

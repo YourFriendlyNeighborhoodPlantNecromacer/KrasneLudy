@@ -3,7 +3,7 @@
 
 #include "functions/new_line.h"
 #include "functions/expand_array.h"
-#include "functions/expand_array_to.h"
+#include "functions/expandArrayTo.h"
 #include "functions/expand_matrix.h"
 #include "functions/min.h"
 #include "functions/max.h"

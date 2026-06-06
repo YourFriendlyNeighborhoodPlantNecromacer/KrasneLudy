@@ -6,11 +6,11 @@
 class house{
     public:
     int64_t index;
-    NamedValues::material favorite_material;
+    namedValues::material favoriteMaterial;
     double coordinates[3];
 
     house(int64_t index);
-    house(int64_t index, double x, double y, double z, NamedValues::material favorite_material);
+    house(int64_t index, double x, double y, double z, namedValues::material favoriteMaterial);
 };
 
 #endif // __HOUSE_H__

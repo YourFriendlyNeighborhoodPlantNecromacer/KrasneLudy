@@ -214,10 +214,10 @@ queue<T>& queue<T>::operator /= (const queue &other){
 
 
 template <typename T>
-bool queue<T>::is_empty(){return length == 0;}
+bool queue<T>::isEmpty(){return length == 0;}
 
 template <typename T>
-typename queue<T>::node* queue<T>::get_head(){return head;}
+typename queue<T>::node* queue<T>::getHead(){return head;}
 
 template <typename T>
 typename queue<T>::node* queue<T>::get_rear(){return rear;}
@@ -252,7 +252,7 @@ void queue<T>::append(node* val){
 
 template <typename T>
 bool queue<T>::dequeue(){
-    if(is_empty()) return false;
+    if(isEmpty()) return false;
     node* temp = head;
     head = head->ahead;
     if(!head) rear = nullptr;

@@ -7,46 +7,52 @@
 #include <ostream>
 #include "../../src/Constants.h"
 
-void generate_country(const std::string file_name, int64_t precision_point = 4, int64_t workplace_quantity_per_material = 10, int64_t house_quantity_per_material = 10, int64_t defult_capacity = 5, bool randomize_quantity = true, int64_t seed = 1){
+void generateCountry(const std::string file_name, int64_t precisionPoint = 4, int64_t currentStructureQuantity = 10, int64_t houseQuantityPerMaterial = 10, int64_t defultCapacity = 5, bool randomizeQuantity = true, int64_t seed = 1){
     std::cout << "GENERATING COUNTRY" << std::endl;
-    std::ofstream new_save_file(file_name);
+    std::ofstream newSaveFile(file_name);
     double x;
     double y;
     double z;
-    double capacity;
+    double currentCapacity = defultCapacity;
     double precision = 1;
-    for(int i = 0; i < precision_point; i++) precision *= 10;
+    for(int i = 0; i < precisionPoint; i++) precision *= 10;
     if(seed == 0) seed = 1;
     std::cout << "VALUES ARE READY" << std::endl;
-    for(int64_t current_material = 0; current_material < NamedValues::material::size; current_material++){
-        int64_t current_material_count;
-        int64_t capacity = defult_capacity;
-        if(randomize_quantity)current_material_count = rand()%(workplace_quantity_per_material+1);
-        std::cout << "CURRENT MATERIAL: " << current_material << "   WORKPLACE QUANTITY: " << current_material_count << std::endl;
-        for(int64_t index = 0; index<current_material_count; index++){
+
+
+    for(int64_t currentMaterial = 0; currentMaterial < namedValues::material::size; currentMaterial++){
+
+        if(randomizeQuantity)currentStructureQuantity = rand()%(currentStructureQuantity+1);
+        std::cout << "CURRENT MATERIAL: " << currentMaterial << "   WORKPLACE QUANTITY: " << currentStructureQuantity << std::endl;
+
+        for(int64_t index = 0; index<currentStructureQuantity; index++){
             x = rand()*seed%((int64_t)precision*+1)/precision;
             y = rand()*seed%((int64_t)precision+1)/precision;
             z = rand()*seed%((int64_t)precision+1)/precision;
-            if(randomize_quantity) capacity = rand()*seed%(defult_capacity)+1;
-            new_save_file << x << ";" << y << ";" << z << ";" << capacity << ";" << '\n';
+            if(randomizeQuantity) currentCapacity = rand()*seed%(defultCapacity)+1;
+            newSaveFile << x << ";" << y << ";" << z << ";" << currentStructureQuantity << ";" << '\n';
         }
-        new_save_file << ";;" << '\n';
+
+        newSaveFile << ";;" << '\n';
     }
-    new_save_file << '\n' << '\n';
-    for(int64_t current_material = 0; current_material < NamedValues::material::size; current_material++){
-        int64_t current_material_count;
-        int64_t capacity = defult_capacity;
-        if(randomize_quantity)current_material_count = rand()%(workplace_quantity_per_material+1);
-        std::cout << "CURRENT MATERIAL: " << current_material << "   WORKPLACE QUANTITY: " << current_material_count << std::endl;
-        for(int64_t index = 0; index<current_material_count; index++){
+    newSaveFile << '\n' << '\n';
+
+    for(int64_t currentMaterial = 0; currentMaterial < namedValues::material::size; currentMaterial++){
+
+        if(randomizeQuantity)currentStructureQuantity = rand()%(houseQuantityPerMaterial+1);
+        std::cout << "CURRENT MATERIAL: " << currentMaterial << "   HOUSE QUANTITY: " << currentStructureQuantity << std::endl;
+
+        for(int64_t index = 0; index<currentStructureQuantity; index++){
             x = rand()*seed%((int64_t)precision+1)/precision;
             y = rand()*seed%((int64_t)precision+1)/precision;
             z = rand()*seed%((int64_t)precision+1)/precision;
-            new_save_file << x << ";" << y << ";" << z << ";" << '\n';
+            newSaveFile << x << ";" << y << ";" << z << ";" << '\n';
         }
-        new_save_file << ";;" << '\n';
+
+        newSaveFile << ";;" << '\n';
     }
-    new_save_file.close();
+
+    newSaveFile.close();
 }
 
 

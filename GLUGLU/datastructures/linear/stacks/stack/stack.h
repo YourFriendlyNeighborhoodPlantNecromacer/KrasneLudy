@@ -23,7 +23,7 @@ class stack{
     stack(T val);
     ~stack();
 
-    bool is_empty();
+    bool isEmpty();
     int64_t get_length();
     void append(T val);
     bool pop();

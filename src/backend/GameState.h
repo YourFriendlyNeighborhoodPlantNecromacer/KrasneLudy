@@ -12,7 +12,7 @@ public:
 	virtual void Init() = 0;
 
 	// Aktualizacja (głównie do logiki) i rysowanie (osobno)
-	virtual void Update(float deltatime, country* country_ptr) = 0;
+	virtual void Update(float deltaTime, country* countryPtr) = 0;
 	virtual void Draw() = 0;
 };
 

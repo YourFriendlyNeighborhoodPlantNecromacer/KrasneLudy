@@ -2,10 +2,10 @@
 #include <inttypes.h>
 #include "../src/Constants.h"
 
-workplace::workplace(int64_t index, double x, double y, double z, NamedValues::material material_extracted, int64_t capacity): index(index), material_extracted(material_extracted), capacity(capacity), amount_of_dwarfs_working(0){
-    coordinates[NamedValues::axis::X] = x;
-    coordinates[NamedValues::axis::Y] = y;
-    coordinates[NamedValues::axis::Z] = z;
+workplace::workplace(int64_t index, double x, double y, double z, namedValues::material materialExtracted, int64_t capacity): index(index), materialExtracted(materialExtracted), capacity(capacity), amountOfDwarfsWorking(0){
+    coordinates[namedValues::axis::X] = x;
+    coordinates[namedValues::axis::Y] = y;
+    coordinates[namedValues::axis::Z] = z;
 }
 
-bool workplace::is_active(){return amount_of_dwarfs_working > 0;}
+bool workplace::isActive(){return amountOfDwarfsWorking > 0;}

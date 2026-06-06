@@ -12,7 +12,7 @@
 
 #include "../../DataStructures/country.h"
 
-inline void GoToTitle(country* country_ptr);
+inline void GoToTitle(country* countryPtr);
 
 static inline void DrawWorkplaceMarker(float x, float y, Color fill) {
     static constexpr float radius = 32.0f;
@@ -55,22 +55,22 @@ static inline void DrawHouseMarker(float x, float y, Color fill) {
 }
 
 static inline void DrawCountryEntities(const country* c) {
-    const auto& workplaces = c->get_workplaces();
-    const auto& houses = c->get_houses();
+    const auto& workplaces = c->getWorkplaces();
+    const auto& houses = c->getHouses();
 
-    for(int material_type = 0; material_type < NamedValues::material::size; material_type++) {
-        Color fill = Config::MATERIAL_COLORS.at(static_cast<NamedValues::material>(material_type));
+    for(int materialType = 0; materialType < namedValues::material::size; materialType++) {
+        Color fill = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(materialType));
 
-        for(int64_t i = 0; i <= workplaces[material_type].get_last_index(); i++) {
-            const auto& wp = workplaces[material_type][i];
+        for(int64_t i = 0; i <= workplaces[materialType].getLastIndex(); i++) {
+            const auto& wp = workplaces[materialType][i];
             if(!wp) continue;
-            DrawWorkplaceMarker((float)wp->coordinates[NamedValues::axis::X] * Config::MAP_HALF, (float)wp->coordinates[NamedValues::axis::Y] * Config::MAP_HALF, fill);
+            DrawWorkplaceMarker((float)wp->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)wp->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
         }
 
-        for(int64_t i = 0; i <= houses[material_type].get_last_index(); i++) {
-            const auto& housePtr = houses[material_type][i];
+        for(int64_t i = 0; i <= houses[materialType].getLastIndex(); i++) {
+            const auto& housePtr = houses[materialType][i];
             if(!housePtr) continue;
-            DrawHouseMarker((float)housePtr->coordinates[NamedValues::axis::X] * Config::MAP_HALF, (float)housePtr->coordinates[NamedValues::axis::Y] * Config::MAP_HALF, fill);
+            DrawHouseMarker((float)housePtr->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)housePtr->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
         }
     }
 }
@@ -93,7 +93,7 @@ class Visualization : public GameState {
     Camera2D camera;
     Font uiFont;
 
-    country* map_pointer;
+    country* mapPointer;
 
     UI::Button btnBack;
     UI::Button btnLoad;
@@ -102,8 +102,8 @@ class Visualization : public GameState {
     int selectedItem = -1;
     int lastSelectedItem = -1;
 
-    Visualization(country* map_pointer)
-        : map_pointer(map_pointer), backgroundTexture{0}, uiFont{0} {
+    Visualization(country* mapPointer)
+        : mapPointer(mapPointer), backgroundTexture{0}, uiFont{0} {
         camera = { 0 };
     }
 
@@ -129,19 +129,19 @@ class Visualization : public GameState {
         sliderMapSize = UI::Slider({ btnBack.bounds.x + 240.0f, btnBack.bounds.y + 15.0f, 300, 10 }, 500.0f, 10000.0f, Config::MAP_SIZE, GRID_STEP, "ROZMIAR MAPY:", uiFont, 20, 20, 30);
     }
 
-    void Update(float deltatime, country* country_ptr) override {
+    void Update(float deltaTime, country* countryPtr) override {
         if (IsKeyReleased(KEY_ESCAPE)) {
             UI::PlaySelectSound();
-            GoToTitle(map_pointer);
+            GoToTitle(mapPointer);
         }
 
-        float panSpeed = PAN_SPEED_BASE * deltatime / camera.zoom;
+        float panSpeed = PAN_SPEED_BASE * deltaTime / camera.zoom;
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    camera.target.y -= panSpeed;
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  camera.target.y += panSpeed;
         if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  camera.target.x -= panSpeed;
         if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) camera.target.x += panSpeed;
 
-        float keyboardZoomSpeed = ZOOM_SPEED_KBD * deltatime;
+        float keyboardZoomSpeed = ZOOM_SPEED_KBD * deltaTime;
         if (IsKeyDown(KEY_KP_ADD) || IsKeyDown(KEY_EQUAL)) camera.zoom += keyboardZoomSpeed;
         if (IsKeyDown(KEY_KP_SUBTRACT) || IsKeyDown(KEY_MINUS)) camera.zoom -= keyboardZoomSpeed;
 
@@ -193,7 +193,7 @@ class Visualization : public GameState {
 
         if (backClicked) {
             UI::PlaySelectSound();
-            GoToTitle(country_ptr);
+            GoToTitle(countryPtr);
         } else if (loadClicked) {
             UI::PlaySelectSound();
         }
@@ -212,7 +212,7 @@ class Visualization : public GameState {
                     }
 
                     // Rysuj mapę jednostek kraju
-                    DrawCountryEntities(map_pointer);
+                    DrawCountryEntities(mapPointer);
             EndMode2D();
         EndScissorMode();
 

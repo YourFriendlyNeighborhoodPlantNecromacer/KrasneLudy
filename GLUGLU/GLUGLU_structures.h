@@ -6,6 +6,6 @@
 #include "datastructures/structures/indexed_node/indexed_node.h"
 #include "datastructures/linear/queues/queue/queue.h"
 #include "datastructures/linear/stacks/stack/stack.h"
-#include "datastructures/linear/dynamic_array/dynamic_array.h"
+#include "datastructures/linear/dynamicArray/dynamicArray.h"
 
 #endif//__GLUGLU_STRUCTURES_H_

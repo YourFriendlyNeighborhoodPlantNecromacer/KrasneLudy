@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 template<typename T>
-class autosorted_dynamic_array;
+class autosorted_dynamicArray;
 
 template<typename arr, typename value>
 int64_t binary_search(arr data, int64_t left_index, int64_t right_index, value searched_value, bool descending = false){

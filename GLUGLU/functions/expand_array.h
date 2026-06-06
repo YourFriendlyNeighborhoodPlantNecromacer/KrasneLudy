@@ -5,20 +5,20 @@
 
 template <typename T>
 void expand_array(T*& array, int64_t& capacity){
-    T* new_array = new T[capacity*2];
-    for(int64_t i = 0; i<capacity; i++) new_array[i] = std::move(array[i]);
+    T* newArray = new T[capacity*2];
+    for(int64_t i = 0; i<capacity; i++) newArray[i] = std::move(array[i]);
     capacity *= 2;
     delete[] array;
-    array = new_array;
+    array = newArray;
 }
 
 template <typename T>
 void expand_array(T*&& array, int64_t& capacity){
-    T* new_array = new T[capacity*2];
-    for(int64_t i = 0; i<capacity; i++) new_array[i] = std::move(array[i]);
+    T* newArray = new T[capacity*2];
+    for(int64_t i = 0; i<capacity; i++) newArray[i] = std::move(array[i]);
     capacity *= 2;
     delete[] array;
-    array = new_array;
+    array = newArray;
 }
 
 #endif//__EXPAND_ARRAY_H__

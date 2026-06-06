@@ -3,12 +3,12 @@
 
 template <typename T>
 void expand_martix(T**& matrix, int64_t& size){
-    T** new_matrix = new T*[size*2];
-    for(int64_t i=0; i<size*2; i++) new_matrix[i] = new T[size*2]();
+    T** newMatrix = new T*[size*2];
+    for(int64_t i=0; i<size*2; i++) newMatrix[i] = new T[size*2]();
 
     for(int64_t i = 0; i<size; i++){
         for(int64_t j = 0; j<size; j++){
-            new_matrix[i][j] = matrix[i][j];
+            newMatrix[i][j] = matrix[i][j];
         }
     }
     for(int64_t i=0; i<size; i++){
@@ -17,6 +17,6 @@ void expand_martix(T**& matrix, int64_t& size){
     delete[] matrix;
 
     size *= 2;
-    matrix = new_matrix;
+    matrix = newMatrix;
 }
 #endif//__EXPAND_MATRIX_H__

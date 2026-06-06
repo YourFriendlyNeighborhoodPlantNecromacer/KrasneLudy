@@ -45,8 +45,8 @@ class queue{
     queue& operator *= (const queue &other);
     queue& operator /= (const queue &other);
 
-    bool is_empty();
-    node* get_head();
+    bool isEmpty();
+    node* getHead();
     node* get_rear();
     T& at(int64_t index);
     int64_t get_lenght();

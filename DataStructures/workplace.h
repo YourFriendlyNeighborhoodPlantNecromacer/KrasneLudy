@@ -8,14 +8,14 @@ class workplace{
     int64_t index;
     double coordinates[3];
 
-    NamedValues::material material_extracted;
+    namedValues::material materialExtracted;
     int64_t capacity;
-    int64_t amount_of_dwarfs_working;
+    int64_t amountOfDwarfsWorking;
 
     workplace(int64_t index);
-    workplace(int64_t index, double x, double y, double z, NamedValues::material material_extracted, int64_t capacity);
+    workplace(int64_t index, double x, double y, double z, namedValues::material materialExtracted, int64_t capacity);
 
-    bool is_active();
+    bool isActive();
 };
 
 #endif

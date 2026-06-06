@@ -5,40 +5,17 @@
 #include "src/Constants.h"
 #include "src/backend/UIHelpers.h"
 #include "GLUGLU/functions/country_generator.h"
-int main () {
-    country kingdom_country;
-    //generate_country("save_file_2.txt", 5, 5, 10, 4, true, 2);
-    kingdom_country.construct_from_file("save_file_2.txt");
 
-    auto active = kingdom_country.get_active_workplaces();
-    std::cout << "last_index = "
-        << active.get_last_index()
-        << std::endl;
+void calculationsAndLogis(country& kingdom, const std::string sourceFile, const std::string outputFileForWorkplaceAssignment, const std::string outputFileForRimPoints){
+    kingdom.constructFromFile(sourceFile);
+    kingdom.assignDwarfsToWorkplaces(outputFileForWorkplaceAssignment);
+    kingdom.saveActiveWorkplaces(kingdom.constructRimAroundCountry(), outputFileForRimPoints);
+}
 
-    active.dp();
-
-    kingdom_country.assign_dwarfs_to_workplaces("resounts2.txt");
-
-    active = kingdom_country.get_active_workplaces();
-    std::cout << "last_index = "
-        << active.get_last_index()
-        << std::endl;
-
-    active.dp();
-
-    std::unique_ptr<dynamic_array<couple<NamedValues::material, int64_t>>> rim_points;
-    rim_points = kingdom_country.construct_rim_around_country();
-    if(!rim_points)
-    {
-        std::cout << "NULLPTR" << std::endl;
-        return 0;
-    }
-    rim_points->dp();
-
-    ///OKNO
+void render_and_graphics(country& kingdom, float screenWidth, float screenHeight, const char* windowName){
     SettingsManager::Instance().LoadSettings();
 
-    InitWindow(Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
+    InitWindow(screenWidth, screenHeight, windowName);
     SetExitKey(KEY_NULL);
     InitAudioDevice();
 
@@ -50,7 +27,7 @@ int main () {
     PlayMusicStream(globalBGM);
     UI::LoadUISounds();
 
-    StateManager::Instance().ChangeState(new Title(&kingdom_country));
+    StateManager::Instance().ChangeState(new Title(&kingdom));
 
     SetTargetFPS(60);
 
@@ -61,8 +38,8 @@ int main () {
         // Dynamiczna aktualizacja głośności muzyki z uwzględnieniem ustawień
         SetMusicVolume(globalBGM, SettingsManager::Instance().GetSettings().musicVolume);
 
-        float deltatime = GetFrameTime();
-        StateManager::Instance().Update(deltatime, &kingdom_country);
+        float deltaTime = GetFrameTime();
+        StateManager::Instance().Update(deltaTime, &kingdom);
 
         BeginDrawing();
             ClearBackground(BLACK);
@@ -80,6 +57,14 @@ int main () {
     CloseAudioDevice();
 
     CloseWindow();
+}
 
+int main () {
+    country kingdom_country;
+    generateCountry("save_file_1.txt", 1, 5, 10, 2, false, 1);
+    calculationsAndLogis(kingdom_country, "save_file_1.txt", "dwarf_workplace_assignment_file_1.txt", "rim_constructing_workplaces_file_1.txt");
+    render_and_graphics(kingdom_country, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
+
+    /**/
     return 0;
 }

@@ -17,10 +17,10 @@ stack<T>::stack() : top_node(nullptr), length(0){}
 template <typename T>
 stack<T>::stack(T val) : top_node(new node(val)), length(1){}
 template <typename T>
-stack<T>::~stack(){if(!is_empty())delete top_node;}
+stack<T>::~stack(){if(!isEmpty())delete top_node;}
 
 template <typename T>
-bool stack<T>::is_empty(){return length == 0;}
+bool stack<T>::isEmpty(){return length == 0;}
 template <typename T>
 void stack<T>::append(T val){
     length++;
@@ -29,7 +29,7 @@ void stack<T>::append(T val){
 }
 template <typename T>
 bool stack<T>::pop(){
-    if(is_empty()) return false;
+    if(isEmpty()) return false;
     length--;
     node* temp = top_node;
     top_node = top_node->under;
