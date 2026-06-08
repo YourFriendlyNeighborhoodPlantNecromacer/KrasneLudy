@@ -19,6 +19,16 @@ inline void GoToTitle(country* countryPtr);
 static constexpr float MARKER_RADIUS = 32.0f;
 static constexpr float MARKER_THICKNESS = 3.0f;
 
+struct Road {
+    Vector2 start;
+    Vector2 end;
+    Color color;
+    int material;
+};
+
+std::vector<Road> roadConnections;
+std::vector<bool> roadMaterialFilter;
+
 static inline void DrawWorkplaceMarker(float x, float y, Color fill) {
     Vector2 top = { x, y - MARKER_RADIUS };
     Vector2 right = { x + MARKER_RADIUS, y };
@@ -60,18 +70,20 @@ static inline void DrawCountryEntities(const country* c) {
     const auto& houses = c->getHouses();
 
     for(int materialType = 0; materialType < namedValues::material::size; materialType++) {
-        Color fill = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(materialType));
+        if (roadMaterialFilter[materialType]) {
+            Color fill = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(materialType));
 
-        for(int64_t i = 0; i <= workplaces[materialType].getLastIndex(); i++) {
-            const auto& wp = workplaces[materialType][i];
-            if(!wp) continue;
-            DrawWorkplaceMarker((float)wp->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)wp->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
-        }
+            for(int64_t i = 0; i <= workplaces[materialType].getLastIndex(); i++) {
+                const auto& wp = workplaces[materialType][i];
+                if(!wp) continue;
+                DrawWorkplaceMarker((float)wp->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)wp->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
+            }
 
-        for(int64_t i = 0; i <= houses[materialType].getLastIndex(); i++) {
-            const auto& housePtr = houses[materialType][i];
-            if(!housePtr) continue;
-            DrawHouseMarker((float)housePtr->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)housePtr->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
+            for(int64_t i = 0; i <= houses[materialType].getLastIndex(); i++) {
+                const auto& housePtr = houses[materialType][i];
+                if(!housePtr) continue;
+                DrawHouseMarker((float)housePtr->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)housePtr->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
+            }
         }
     }
 }
@@ -134,13 +146,6 @@ class Visualization : public GameState {
 
     country* mapPointer;
 
-    struct Road {
-        Vector2 start;
-        Vector2 end;
-        Color color;
-        int material;
-    };
-
     UI::Button btnBack;
     UI::Button btnToggleRoads;
     UI::Button btnRoadRenderOptions;
@@ -156,8 +161,6 @@ class Visualization : public GameState {
     int lastSelectedItem = -1;
     int lastOverlayHoveredItem = -1;
 
-    std::vector<Road> roadConnections;
-    std::vector<bool> roadMaterialFilter;
     bool showRoads = false;
     bool showRoadOptions = false;
     bool showWorldOptions = false;
