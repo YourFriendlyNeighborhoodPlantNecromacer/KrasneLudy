@@ -108,7 +108,6 @@ class Visualization : public GameState {
     static constexpr float ROAD_OPTIONS_WIDTH = 160.0f;
     static constexpr float ROAD_OPTIONS_ITEM_HEIGHT = 30.0f;
     static constexpr float ROAD_OPTIONS_TOTAL_HEIGHT = ROAD_OPTIONS_ITEM_HEIGHT * namedValues::material::size;
-    static constexpr float ROAD_THICKNESS = 8.0f;
     static constexpr float ROAD_OPTIONS_MAX_TEXT_WIDTH = ROAD_OPTIONS_WIDTH - 45.0f;
 
     // Układ i stałe interfejsu
@@ -154,14 +153,17 @@ class Visualization : public GameState {
     UI::Button btnBack;
     UI::Button btnToggleRoads;
     UI::Button btnToggleRim;
-    UI::Button btnRoadRenderOptions;
+    UI::Button btnRoadOptions;
     UI::Button btnWorldOptions;
+    UI::Button btnRimOptions;
 
     UI::Slider sliderRoadThickness;
     UI::Slider sliderRoadOpacity;
     UI::Slider sliderMapSize;
     UI::Slider sliderGridOpacity;
     UI::Slider sliderGridThickness;
+    UI::Slider sliderRimThickness;
+    UI::Slider sliderRimOpacity;
 
     int selectedItem = -1;
     int lastSelectedItem = -1;
@@ -169,11 +171,16 @@ class Visualization : public GameState {
 
     bool showRoads = false;
     bool showRim = false;
+
     bool showRoadOptions = false;
+    bool showRimOptions = false;
     bool showWorldOptions = false;
+
     bool gridEnabled = true;
     float roadThickness = 8.0f;
     float roadOpacity = 0.7f;
+    float rimThickness = 8.0f;
+    float rimOpacity = 0.7f;
     float gridOpacity = 0.2f;
     float gridThickness = 1.0f;
 
@@ -201,12 +208,16 @@ class Visualization : public GameState {
 
         btnBack = UI::Button({ viewportArea.x, viewportArea.y + viewportArea.height + UI_BTN_OFFSET_Y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "WYJDŹ", uiFont, MAROON, RED);
         btnToggleRoads = UI::Button({ viewportArea.x, btnBack.bounds.y + btnBack.bounds.height + UI_BTN_SPACING_Y, UI::BUTTON_WIDTH - UI_BTN_TOGGLE_WIDTH_DELTA, UI_BTN_HEIGHT }, "RYSUJ DROGI", uiFont);
-        btnRoadRenderOptions = UI::Button({ btnToggleRoads.bounds.x + btnToggleRoads.bounds.width + MENU_MARGIN, btnToggleRoads.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
+        btnRoadOptions = UI::Button({ btnToggleRoads.bounds.x + btnToggleRoads.bounds.width + MENU_MARGIN, btnToggleRoads.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
         btnWorldOptions = UI::Button({ btnBack.bounds.x + UI_BTN_WORLD_X_OFFSET, btnBack.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "OPCJE ŚWIATA", uiFont);
-        btnToggleRim = UI::Button({btnWorldOptions.bounds.x, btnToggleRoads.bounds.y, UI::BUTTON_WIDTH, UI::BUTTON_HEIGHT}, "RYSUJ OBWÓDKĘ", uiFont);
+        btnToggleRim = UI::Button({btnWorldOptions.bounds.x, btnToggleRoads.bounds.y, UI::BUTTON_WIDTH - UI_BTN_TOGGLE_WIDTH_DELTA, UI_BTN_HEIGHT}, "RYSUJ OBWÓDKĘ", uiFont);
+        btnRimOptions = UI::Button({ btnToggleRim.bounds.x + btnToggleRim.bounds.width + MENU_MARGIN, btnToggleRim.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
 
         sliderRoadThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 1.0f, 30.0f, roadThickness, 1.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderRoadOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, roadOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
+
+        sliderRimThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 1.0f, 30.0f, rimThickness, 1.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
+        sliderRimOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, rimOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
 
         sliderMapSize = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 400.0f, 10000.0f, Config::MAP_SIZE, GRID_STEP * 2.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderGridOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, gridOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
@@ -320,7 +331,7 @@ class Visualization : public GameState {
 
         if (showRoadOptions) {
             float fullH = ROAD_OPTIONS_TOTAL_HEIGHT + ROAD_OPTIONS_EXTRA_HEIGHT;
-            Vector2 menuPos = { btnRoadRenderOptions.bounds.x + btnRoadRenderOptions.bounds.width - ROAD_OPTIONS_WIDTH, btnRoadRenderOptions.bounds.y - fullH - UI_BTN_SPACING_Y };
+            Vector2 menuPos = { btnRoadOptions.bounds.x + btnRoadOptions.bounds.width - ROAD_OPTIONS_WIDTH, btnRoadOptions.bounds.y - fullH - UI_BTN_SPACING_Y };
             Rectangle menuArea = { menuPos.x - MENU_MARGIN, menuPos.y - MENU_MARGIN, ROAD_OPTIONS_WIDTH + (MENU_MARGIN * 2.0f), fullH + (MENU_MARGIN * 2.0f) };
 
             // Aktualizuj tory suwaków przed Update/Draw, aby zapewnić poprawną pozycję w pierwszej klatce
@@ -359,8 +370,36 @@ class Visualization : public GameState {
                         }
                     }
                 }
-            } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(mouse, btnRoadRenderOptions.bounds)) {
+            } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(mouse, btnRoadOptions.bounds)) {
                 showRoadOptions = false;
+            } else {
+                lastOverlayHoveredItem = -1;
+            }
+        }
+
+        if (showRimOptions) {
+            float fullH = ROAD_OPTIONS_EXTRA_HEIGHT;
+            Vector2 menuPos = { btnRimOptions.bounds.x + btnRimOptions.bounds.width - ROAD_OPTIONS_WIDTH, btnRimOptions.bounds.y - fullH - UI_BTN_SPACING_Y };
+            Rectangle menuArea = { menuPos.x - MENU_MARGIN, menuPos.y - MENU_MARGIN, ROAD_OPTIONS_WIDTH + (MENU_MARGIN * 2.0f), fullH + (MENU_MARGIN * 2.0f) };
+
+            sliderRimThickness.track.x = menuPos.x + MENU_PADDING;
+            sliderRimThickness.track.y = menuPos.y + SLIDER_TRACK_Y;
+            sliderRimOpacity.track.x = menuPos.x + MENU_PADDING;
+            sliderRimOpacity.track.y = sliderRimThickness.track.y + SLIDER_STEP_Y;
+
+            if (sliderRimThickness.Update()) rimThickness = sliderRimThickness.GetValue();
+            if (sliderRimOpacity.Update()) rimOpacity = sliderRimOpacity.GetValue();
+
+            if (CheckCollisionPointRec(mouse, menuArea)) {
+                inputConsumedByMenu = true;
+                int currentHover = -1;
+                if (CheckCollisionPointRec(mouse, sliderRimThickness.track)) currentHover = 0;
+                if (CheckCollisionPointRec(mouse, sliderRimOpacity.track)) currentHover = 1;
+
+                if (currentHover != lastOverlayHoveredItem && currentHover != -1) UI::PlayHoverSound();
+                lastOverlayHoveredItem = currentHover;
+            } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !CheckCollisionPointRec(mouse, btnRimOptions.bounds)) {
+                showRimOptions = false;
             } else {
                 lastOverlayHoveredItem = -1;
             }
@@ -419,19 +458,21 @@ class Visualization : public GameState {
         btnToggleRim.hoverColor = showRim ? DARKGREEN : DARKGRAY;
         btnToggleRim.regularColor = showRim ? Color{0, 160, 0, 255} : GRAY;
 
-        bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false, rimClicked = false;
+        bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false, rimClicked = false, rimOptionsClicked = false;
         if (!inputConsumedByMenu) {
             backClicked = btnBack.Update();
             roadsClicked = btnToggleRoads.Update();
-            optionsClicked = btnRoadRenderOptions.Update();
+            optionsClicked = btnRoadOptions.Update();
             worldClicked = btnWorldOptions.Update();
             rimClicked = btnToggleRim.Update();
+            rimOptionsClicked = btnRimOptions.Update();
 
             if (btnBack.IsHovered()) selectedItem = 0;
             else if (btnToggleRoads.IsHovered()) selectedItem = 1;
-            else if (btnRoadRenderOptions.IsHovered()) selectedItem = 2;
+            else if (btnRoadOptions.IsHovered()) selectedItem = 2;
             else if (btnWorldOptions.IsHovered()) selectedItem = 3;
             else if (btnToggleRim.IsHovered()) selectedItem = 4;
+            else if (btnRimOptions.IsHovered()) selectedItem = 5;
             else selectedItem = -1;
         } else {
             selectedItem = -1;
@@ -455,18 +496,27 @@ class Visualization : public GameState {
         } else if (optionsClicked) {
             UI::PlaySelectSound();
             showRoadOptions = !showRoadOptions;
-
-            if(showRoadOptions)
+            if(showRoadOptions) {
                 showWorldOptions = false;
+                showRimOptions = false;
+            }
         } else if (worldClicked) {
             UI::PlaySelectSound();
             showWorldOptions = !showWorldOptions;
-
-            if(showWorldOptions)
+            if(showWorldOptions) {
                 showRoadOptions = false;
+                showRimOptions = false;
+            }
         } else if (rimClicked) {
             UI::PlaySelectSound();
             showRim = !showRim;
+        } else if (rimOptionsClicked) {
+            UI::PlaySelectSound();
+            showRimOptions = !showRimOptions;
+            if(showRimOptions) {
+                showRoadOptions = false;
+                showWorldOptions = false;
+            }
         }
     }
 
@@ -496,7 +546,7 @@ class Visualization : public GameState {
             Vector2 s = { p1_raw.x * Config::MAP_HALF, p1_raw.y * Config::MAP_HALF };
             Vector2 e = { p2_raw.x * Config::MAP_HALF, p2_raw.y * Config::MAP_HALF };
 
-            DrawLineEx(s, e, ROAD_THICKNESS, Fade(Config::RIM_COLOR, roadOpacity));
+            DrawLineEx(s, e, rimThickness, Fade(Config::RIM_COLOR, rimOpacity));
         }
     }
 
@@ -528,24 +578,25 @@ class Visualization : public GameState {
         btnBack.Draw();
         btnToggleRoads.Draw();
         btnToggleRim.Draw();
-        btnRoadRenderOptions.Draw();
+        btnRimOptions.Draw();
+        btnRoadOptions.Draw();
         btnWorldOptions.Draw();
 
         if (selectedItem != -1) {
-            Rectangle r = (selectedItem == 0) ? btnBack.bounds :
-                        (selectedItem == 1 ? btnToggleRoads.bounds :
-                        (selectedItem == 2 ? btnRoadRenderOptions.bounds :
-                        (selectedItem == 3 ? btnWorldOptions.bounds : btnToggleRim.bounds)));
+            Rectangle r = (selectedItem == 0) ? btnBack.bounds : (selectedItem == 1 ? btnToggleRoads.bounds : (selectedItem == 2 ? btnRoadOptions.bounds :
+                        (selectedItem == 3 ? btnWorldOptions.bounds : (selectedItem == 4 ? btnToggleRim.bounds : btnRimOptions.bounds))));
+
             DrawRectangleLinesEx({ r.x - UI::SELECTOR_PADDING, r.y - UI::SELECTOR_PADDING, r.width + (UI::SELECTOR_PADDING * 2.0f), r.height + (UI::SELECTOR_PADDING * 2.0f) }, UI::SELECTOR_THICKNESS, Color{SELECTOR_COLOR_R, SELECTOR_COLOR_G, 0, 255});
         }
 
+        if (showRimOptions) DrawRimOptionsOverlay();
         if (showRoadOptions) DrawOptionsOverlay();
         if (showWorldOptions) DrawWorldOptionsOverlay();
     }
 
     void DrawOptionsOverlay() {
         float fullH = ROAD_OPTIONS_TOTAL_HEIGHT + ROAD_OPTIONS_EXTRA_HEIGHT;
-        Vector2 pos = { btnRoadRenderOptions.bounds.x + btnRoadRenderOptions.bounds.width - ROAD_OPTIONS_WIDTH, btnRoadRenderOptions.bounds.y - fullH - UI_BTN_SPACING_Y };
+        Vector2 pos = { btnRoadOptions.bounds.x + btnRoadOptions.bounds.width - ROAD_OPTIONS_WIDTH, btnRoadOptions.bounds.y - fullH - UI_BTN_SPACING_Y };
         Vector2 mouse = GetMousePosition();
 
         DrawRectangleRec({ pos.x - MENU_MARGIN, pos.y - MENU_MARGIN, ROAD_OPTIONS_WIDTH + (MENU_MARGIN * 2.0f), fullH + (MENU_MARGIN * 2.0f) }, Fade(BLACK, OVERLAY_ALPHA));
@@ -588,6 +639,19 @@ class Visualization : public GameState {
         sliderRoadThickness.Draw();
         DrawTextEx(uiFont, "PRZEŹROCZYSTOŚĆ", { pos.x + MENU_PADDING, pos.y + ROAD_OPTIONS_TOTAL_HEIGHT + SLIDER_LABEL_Y + SLIDER_STEP_Y }, UI::LIST_ITEM_FONT_SIZE, 1.0f, WHITE);
         sliderRoadOpacity.Draw();
+    }
+
+    void DrawRimOptionsOverlay() {
+        float fullH = ROAD_OPTIONS_EXTRA_HEIGHT;
+        Vector2 pos = { btnRimOptions.bounds.x + btnRimOptions.bounds.width - ROAD_OPTIONS_WIDTH, btnRimOptions.bounds.y - fullH - UI_BTN_SPACING_Y };
+
+        DrawRectangleRec({ pos.x - MENU_MARGIN, pos.y - MENU_MARGIN, ROAD_OPTIONS_WIDTH + (MENU_MARGIN * 2.0f), fullH + (MENU_MARGIN * 2.0f) }, Fade(BLACK, OVERLAY_ALPHA));
+        DrawRectangleLinesEx({ pos.x - MENU_MARGIN, pos.y - MENU_MARGIN, ROAD_OPTIONS_WIDTH + (MENU_MARGIN * 2.0f), fullH + (MENU_MARGIN * 2.0f) }, MENU_BORDER_THICKNESS, RAYWHITE);
+
+        DrawTextEx(uiFont, "GRUBOŚĆ OBWÓDKI", { pos.x + MENU_PADDING, pos.y + SLIDER_LABEL_Y }, UI::LIST_ITEM_FONT_SIZE, 1.0f, WHITE);
+        sliderRimThickness.Draw();
+        DrawTextEx(uiFont, "PRZEŹROCZYSTOŚĆ", { pos.x + MENU_PADDING, pos.y + SLIDER_LABEL_Y + SLIDER_STEP_Y }, UI::LIST_ITEM_FONT_SIZE, 1.0f, WHITE);
+        sliderRimOpacity.Draw();
     }
 
     void DrawWorldOptionsOverlay() {
