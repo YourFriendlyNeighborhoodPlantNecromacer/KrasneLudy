@@ -26,8 +26,14 @@ struct Road {
     int material;
 };
 
+struct RimPoint {
+    Vector2 position;
+    int material;
+};
+
 std::vector<Road> roadConnections;
-std::vector<bool> roadMaterialFilter;
+std::vector<RimPoint> rimPoints;
+std::vector<bool> worldMaterialFilter;
 
 static inline void DrawWorkplaceMarker(float x, float y, Color fill) {
     Vector2 top = { x, y - MARKER_RADIUS };
@@ -70,7 +76,7 @@ static inline void DrawCountryEntities(const country* c) {
     const auto& houses = c->getHouses();
 
     for(int materialType = 0; materialType < namedValues::material::size; materialType++) {
-        if (roadMaterialFilter[materialType]) {
+        if (worldMaterialFilter[materialType]) {
             Color fill = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(materialType));
 
             for(int64_t i = 0; i <= workplaces[materialType].getLastIndex(); i++) {
@@ -133,7 +139,6 @@ class Visualization : public GameState {
     static constexpr float MENU_TEXT_OFFSET_X = 30.0f;
     static constexpr float MENU_TEXT_OFFSET_Y = 6.0f;
 
-
     static constexpr float OVERLAY_ALPHA = 0.9f;
     static constexpr float VIEWPORT_DIM_ALPHA = 0.15f;
     static constexpr unsigned char SELECTOR_COLOR_R = 96;
@@ -148,6 +153,7 @@ class Visualization : public GameState {
 
     UI::Button btnBack;
     UI::Button btnToggleRoads;
+    UI::Button btnToggleRim;
     UI::Button btnRoadRenderOptions;
     UI::Button btnWorldOptions;
 
@@ -162,6 +168,7 @@ class Visualization : public GameState {
     int lastOverlayHoveredItem = -1;
 
     bool showRoads = false;
+    bool showRim = false;
     bool showRoadOptions = false;
     bool showWorldOptions = false;
     bool gridEnabled = true;
@@ -196,6 +203,7 @@ class Visualization : public GameState {
         btnToggleRoads = UI::Button({ viewportArea.x, btnBack.bounds.y + btnBack.bounds.height + UI_BTN_SPACING_Y, UI::BUTTON_WIDTH - UI_BTN_TOGGLE_WIDTH_DELTA, UI_BTN_HEIGHT }, "RYSUJ DROGI", uiFont);
         btnRoadRenderOptions = UI::Button({ btnToggleRoads.bounds.x + btnToggleRoads.bounds.width + MENU_MARGIN, btnToggleRoads.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
         btnWorldOptions = UI::Button({ btnBack.bounds.x + UI_BTN_WORLD_X_OFFSET, btnBack.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "OPCJE ŚWIATA", uiFont);
+        btnToggleRim = UI::Button({btnWorldOptions.bounds.x, btnToggleRoads.bounds.y, UI::BUTTON_WIDTH, UI::BUTTON_HEIGHT}, "RYSUJ OBWÓDKĘ", uiFont);
 
         sliderRoadThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 1.0f, 30.0f, roadThickness, 1.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderRoadOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, roadOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
@@ -204,8 +212,10 @@ class Visualization : public GameState {
         sliderGridOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, gridOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderGridThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.1f, 10.0f, gridThickness, 0.5f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
 
-        roadMaterialFilter.assign(namedValues::material::size, true);
+        worldMaterialFilter.assign(namedValues::material::size, true);
+
         LoadAssignments();
+        LoadRimPoints();
     }
 
     void LoadAssignments() {
@@ -238,6 +248,30 @@ class Visualization : public GameState {
                         roadConnections.push_back({ start, end, color, m });
                     }
                 }
+            }
+        }
+    }
+
+    void LoadRimPoints() {
+        rimPoints.clear();
+        std::ifstream file("rim_constructing_workplaces_file_1.txt");
+        if (!file.is_open()) return;
+
+        std::string line;
+
+        while (std::getline(file, line)) {
+            if (line.empty()) continue;
+
+            size_t sep = line.find(';');
+            if (sep == std::string::npos) continue;
+
+            int matIDX = std::stoi(line.substr(0, sep));
+            int workIDX = std::stoi(line.substr(sep + 1));
+
+            const auto& workplace = mapPointer->getWorkplaces()[matIDX][workIDX];
+            if (workplace) {
+                Vector2 pos = { (float)workplace->coordinates[namedValues::axis::X], (float)workplace->coordinates[namedValues::axis::Y] };
+                rimPoints.push_back({ pos, matIDX });
             }
         }
     }
@@ -319,7 +353,7 @@ class Visualization : public GameState {
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                     for (int i = 0; i < namedValues::material::size; i++) {
                         if (CheckCollisionPointRec(mouse, { menuPos.x, menuPos.y + i * ROAD_OPTIONS_ITEM_HEIGHT, ROAD_OPTIONS_WIDTH, ROAD_OPTIONS_ITEM_HEIGHT })) {
-                            roadMaterialFilter[i] = !roadMaterialFilter[i];
+                            worldMaterialFilter[i] = !worldMaterialFilter[i];
                             UI::PlaySelectSound();
                             break;
                         }
@@ -378,21 +412,26 @@ class Visualization : public GameState {
             }
         }
 
-        // Dynamiczna informacja zwrotna dla przycisku przełączania
+        // Dynamiczna informacja zwrotna dla przycisków
         btnToggleRoads.hoverColor = showRoads ? DARKGREEN : DARKGRAY;
         btnToggleRoads.regularColor = showRoads ? Color{0, 160, 0, 255} : GRAY;
 
-        bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false;
+        btnToggleRim.hoverColor = showRim ? DARKGREEN : DARKGRAY;
+        btnToggleRim.regularColor = showRim ? Color{0, 160, 0, 255} : GRAY;
+
+        bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false, rimClicked = false;
         if (!inputConsumedByMenu) {
             backClicked = btnBack.Update();
             roadsClicked = btnToggleRoads.Update();
             optionsClicked = btnRoadRenderOptions.Update();
             worldClicked = btnWorldOptions.Update();
+            rimClicked = btnToggleRim.Update();
 
             if (btnBack.IsHovered()) selectedItem = 0;
             else if (btnToggleRoads.IsHovered()) selectedItem = 1;
             else if (btnRoadRenderOptions.IsHovered()) selectedItem = 2;
             else if (btnWorldOptions.IsHovered()) selectedItem = 3;
+            else if (btnToggleRim.IsHovered()) selectedItem = 4;
             else selectedItem = -1;
         } else {
             selectedItem = -1;
@@ -425,6 +464,39 @@ class Visualization : public GameState {
 
             if(showWorldOptions)
                 showRoadOptions = false;
+        } else if (rimClicked) {
+            UI::PlaySelectSound();
+            showRim = !showRim;
+        }
+    }
+
+    void DrawRoads() {
+        for (const auto& road : roadConnections) {
+            if (worldMaterialFilter[road.material]) {
+                Vector2 s = { road.start.x * Config::MAP_HALF, road.start.y * Config::MAP_HALF };
+                Vector2 e = { road.end.x * Config::MAP_HALF, road.end.y * Config::MAP_HALF };
+                DrawLineEx(s, e, roadThickness, Fade(road.color, roadOpacity));
+            }
+        }
+    }
+
+    void DrawRim() {
+        if (rimPoints.size() < 2) return;
+
+        for (size_t i = 0; i < rimPoints.size(); ++i) {
+            Vector2 p1_raw = rimPoints[i].position;
+            Vector2 p2_raw;
+
+            if (i == rimPoints.size() - 1) {
+                p2_raw = rimPoints[0].position;
+            } else {
+                p2_raw = rimPoints[i+1].position;
+            }
+
+            Vector2 s = { p1_raw.x * Config::MAP_HALF, p1_raw.y * Config::MAP_HALF };
+            Vector2 e = { p2_raw.x * Config::MAP_HALF, p2_raw.y * Config::MAP_HALF };
+
+            DrawLineEx(s, e, ROAD_THICKNESS, Fade(Config::RIM_COLOR, roadOpacity));
         }
     }
 
@@ -443,15 +515,8 @@ class Visualization : public GameState {
                 }
 
                 // Rysuj drogi (połączenia) pod markerami dla lepszej czytelności
-                if (showRoads) {
-                    for (const auto& road : roadConnections) {
-                        if (roadMaterialFilter[road.material]) {
-                            Vector2 s = { road.start.x * Config::MAP_HALF, road.start.y * Config::MAP_HALF };
-                            Vector2 e = { road.end.x * Config::MAP_HALF, road.end.y * Config::MAP_HALF };
-                            DrawLineEx(s, e, roadThickness, Fade(road.color, roadOpacity));
-                        }
-                    }
-                }
+                if (showRoads) DrawRoads();
+                if (showRim) DrawRim();
 
                 // Rysuj mapę jednostek kraju
                 DrawCountryEntities(mapPointer);
@@ -462,13 +527,15 @@ class Visualization : public GameState {
 
         btnBack.Draw();
         btnToggleRoads.Draw();
+        btnToggleRim.Draw();
         btnRoadRenderOptions.Draw();
         btnWorldOptions.Draw();
 
         if (selectedItem != -1) {
             Rectangle r = (selectedItem == 0) ? btnBack.bounds :
                         (selectedItem == 1 ? btnToggleRoads.bounds :
-                        (selectedItem == 2 ? btnRoadRenderOptions.bounds : btnWorldOptions.bounds));
+                        (selectedItem == 2 ? btnRoadRenderOptions.bounds :
+                        (selectedItem == 3 ? btnWorldOptions.bounds : btnToggleRim.bounds)));
             DrawRectangleLinesEx({ r.x - UI::SELECTOR_PADDING, r.y - UI::SELECTOR_PADDING, r.width + (UI::SELECTOR_PADDING * 2.0f), r.height + (UI::SELECTOR_PADDING * 2.0f) }, UI::SELECTOR_THICKNESS, Color{SELECTOR_COLOR_R, SELECTOR_COLOR_G, 0, 255});
         }
 
@@ -494,9 +561,9 @@ class Visualization : public GameState {
 
             Color mColor = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(i));
             const char* mName = Config::MATERIAL_NAMES.at(static_cast<namedValues::material>(i));
-            Color textColor = roadMaterialFilter[i] ? (isHovered ? YELLOW : WHITE) : GRAY;
+            Color textColor = worldMaterialFilter[i] ? (isHovered ? YELLOW : WHITE) : GRAY;
 
-            DrawCircleV({ r.x + 15.0f, r.y + ROAD_OPTIONS_ITEM_HEIGHT / 2.0f }, MENU_CIRCLE_R, roadMaterialFilter[i] ? mColor : DARKGRAY);
+            DrawCircleV({ r.x + 15.0f, r.y + ROAD_OPTIONS_ITEM_HEIGHT / 2.0f }, MENU_CIRCLE_R, worldMaterialFilter[i] ? mColor : DARKGRAY);
 
             // Ściskanie tekstu jeżeli za dlugie
             Vector2 textSize = MeasureTextEx(uiFont, mName, UI::NORMAL_FONT_SIZE, 1.0f);
