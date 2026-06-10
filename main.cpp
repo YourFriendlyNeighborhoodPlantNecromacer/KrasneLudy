@@ -6,11 +6,18 @@
 #include "src/backend/UIHelpers.h"
 #include "GLUGLU/functions/country_generator.h"
 #include <filesystem>
+#include "GLUGLU/functions/huffman_compression.h"
 
-void calculationsAndLogis(country& kingdom, const std::string sourceFile, const std::string outputFileForWorkplaceAssignment, const std::string outputFileForRimPoints){
-    kingdom.constructFromFile(sourceFile);
-    kingdom.assignDwarfsToWorkplaces(outputFileForWorkplaceAssignment);
-    kingdom.saveActiveWorkplaces(kingdom.constructRimAroundCountry(), outputFileForRimPoints);
+void calculationsAndLogis(country& kingdom, const std::string baseFileName){
+    const std::string directory = baseFileName + "/";
+    const std::string outputFileForWorkplaceAssignment = baseFileName + "_dwarf_workplace_assignment.txt";
+    const std::string outputFileForRimPoints = baseFileName + "_rim_variables.txt";
+    kingdom.constructFromFile(baseFileName + ".txt");
+    kingdom.assignDwarfsToWorkplaces(directory + outputFileForWorkplaceAssignment);
+    kingdom.saveActiveWorkplaces(kingdom.constructRimAroundCountry(), directory  + outputFileForRimPoints);
+    std::cout << "AAAA" << std::endl;
+    huffman_compression(directory + outputFileForWorkplaceAssignment, directory + "compressed_" + outputFileForWorkplaceAssignment);
+    huffman_compression(directory + outputFileForRimPoints, directory + "compressed_" + outputFileForRimPoints);
 }
 
 void render_and_graphics(country& kingdom, float screenWidth, float screenHeight, const char* windowName){
@@ -65,37 +72,26 @@ int main (int argc, char** argv) {
         std::cerr << "WRONG AMOUNT OF ARGUMENTS, PLEASE INSTERT A SINGLE FILE";
         return -1;
     }
-    country kingdom_country;
-    std::filesystem::path input_path;
-    std::string base_name;
+    country kingdomCountry;
+    std::string baseFileName;
     if(argc == 2){ ///  Został podany plik
-        input_path = argv[1];
-        base_name = input_path.stem().string();
+        baseFileName = argv[1];
     }
     if(argc == 1){ /// Nie został podany plik
-        base_name = "RandomlyGenerated";
-        input_path = base_name + ".txt";
+        baseFileName = "randomly_generated";
         int64_t precisionPoint = 3;
         int64_t amountOfWorkplacesPerMaterial = 3;
         int64_t amountOfHousesPerMaterial = 3;
         int64_t capacity = 3;
         bool randomized = true;
         int64_t seed = 3;
-        generateCountry(input_path, precisionPoint, amountOfWorkplacesPerMaterial, amountOfHousesPerMaterial, capacity, randomized, seed);
+        generateCountry(baseFileName + ".txt", precisionPoint, amountOfWorkplacesPerMaterial, amountOfHousesPerMaterial, capacity, randomized, seed);
     }
 
 
-    if(std::filesystem::create_directories(base_name)) std::cout << "WOW";
-    std::string workplace_file =
-    base_name + "/" +
-    base_name + "_dwarf_workplace_assignment.txt";
-
-    std::string rim_file =
-    base_name + "/" +
-    base_name + "_outer_rim.txt";
-
-    calculationsAndLogis(kingdom_country, input_path.string(), workplace_file, rim_file);
-    render_and_graphics(kingdom_country, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
+    if(std::filesystem::create_directories(baseFileName)) std::cout << "WOW";
+    calculationsAndLogis(kingdomCountry, baseFileName);
+    render_and_graphics(kingdomCountry, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
 
     /**/
     return 0;
