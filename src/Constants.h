@@ -59,6 +59,8 @@ namespace Config {
         {namedValues::material::gems, "KLEJNOTY"},
         {namedValues::material::gardenGnomes, "KRASNALE OGRODOWE"}
     };
+
+    const Color RIM_COLOR = Color{255,196,0,255};
 }
 
 namespace UI {
