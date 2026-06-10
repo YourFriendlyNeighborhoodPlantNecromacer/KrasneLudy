@@ -226,7 +226,7 @@ public:
         HandleToggle(miscButtons[0], IDX_MISC_START, settings.showFPS);
         if (miscButtons[1].IsHovered()) selectedItem = IDX_MISC_START + 1;
         if (miscButtons[1].Update() || (selectedItem == IDX_MISC_START + 1 && IsKeyPressed(KEY_ENTER))) {
-            settings.menuBackgroundIndex = (settings.menuBackgroundIndex + 1) % 2;
+            settings.menuBackgroundIndex = (settings.menuBackgroundIndex + 1) % 3;
             SaveSettings();
             // Przeładuj teksturę tła
             UnloadTexture(backgroundTexture);
@@ -324,7 +324,7 @@ public:
         DrawTextEx(headerFont, "INNE USTAWIENIA:", {startX, startY}, 20, UI::FONT_SPACING_NORMAL, isSectionActive ? YELLOW : DARKGRAY);
 
         const char* labels[] = {"Wyświetlaj FPS", "Tło Menu"};
-        const char* bgTexts[] = {"Marmur", "Ciemne"};
+        const char* bgTexts[] = {"Marmur", "Drewno", "Woda"};
         const char* values[] = { settings.showFPS ? "WŁ." : "WYŁ.", bgTexts[settings.menuBackgroundIndex] };
 
         for (int i = 0; i < MISC_OPTIONS_COUNT; i++) {

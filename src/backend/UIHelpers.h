@@ -47,7 +47,9 @@ namespace UI {
 
     inline const char* GetBackgroundPath() {
         int idx = SettingsManager::Instance().GetSettings().menuBackgroundIndex;
-        return (idx == 0) ? "images/ui/marble.png" : "images/ui/marble_dark.png";
+
+        return (idx == 0) ? "images/ui/marble.png" :
+                (idx == 1 ? "images/ui/wood.png" : "images/ui/water.png");
     }
 
     // Ładowanie czcionki ze wsparciem dla znaków polskich gdyż to nie standard w raylib
