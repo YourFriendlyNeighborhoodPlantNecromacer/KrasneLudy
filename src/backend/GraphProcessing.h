@@ -5,8 +5,11 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
+#include <chrono>
 #include "../../DataStructures/country.h"
 #include "../Constants.h"
+#include "../../GLUGLU/functions/huffman_compression.h"
 
 struct Road {
     Vector2 start;
@@ -87,6 +90,47 @@ inline void LoadRimPoints(country* mapPointer, const std::string& baseFileName) 
             rimPoints.push_back({ pos, matIDX });
         }
     }
+}
+
+inline void LogTime(const std::string& label, std::chrono::high_resolution_clock::time_point start, const std::string& prefix = "[LOG]") {
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration<double, std::milli>(end - start).count();
+    std::cout << prefix << " " << label << ": " << duration << " ms" << std::endl;
+}
+
+inline void ProcessCountryData(country& kingdom, const std::string& baseFileName) {
+    auto startTotal = std::chrono::high_resolution_clock::now();
+
+    const std::string directory = baseFileName + "/";
+    const std::string outputFileForWorkplaceAssignment = baseFileName + "_dwarf_workplace_assignment.txt";
+    const std::string outputFileForRimPoints = baseFileName + "_rim_variables.txt";
+
+    auto measure = [](const std::string& label, auto task) {
+        auto start = std::chrono::high_resolution_clock::now();
+        task();
+        LogTime(label, start);
+    };
+
+    std::cout << "[INFO] PROCESSING DATA FOR: " << baseFileName << std::endl;
+
+    measure("Building Country", [&]() { kingdom.constructFromFile(baseFileName + ".txt"); });
+    measure("Assigning Dwarfs To Workplaces", [&]() { kingdom.assignDwarfsToWorkplaces(directory + outputFileForWorkplaceAssignment); });
+
+    std::unique_ptr<dynamicArray<couple<namedValues::material, int64_t>>> rim;
+    measure("Constructing Rim", [&]() { rim = kingdom.constructRimAroundCountry(); });
+    measure("Saving Active Workplaces", [&]() { kingdom.saveActiveWorkplaces(std::move(rim), directory + outputFileForRimPoints); });
+
+    measure("Huffman Compression", [&]() {
+        huffman_compression(directory + outputFileForWorkplaceAssignment, directory + "compressed_" + outputFileForWorkplaceAssignment);
+        huffman_compression(directory + outputFileForRimPoints, directory + "compressed_" + outputFileForRimPoints);
+    });
+
+    InitGraphFilter();
+    measure("Loading Assignments From File", [&]() { LoadAssignments(&kingdom, baseFileName); });
+    measure("Loading Rim Points From File", [&]() { LoadRimPoints(&kingdom, baseFileName); });
+
+    LogTime("TOTAL TIME TAKEN:", startTotal, "[INFO]");
+    std::cout << std::endl;
 }
 
 #endif // BACKEND_GRAPH_PROCESSING_H

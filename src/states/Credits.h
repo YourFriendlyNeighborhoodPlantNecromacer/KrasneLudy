@@ -53,7 +53,7 @@ class Credits : public GameState {
 
         const char* titleText = "TWÓRCY ROZWIĄZANIA PROJEKTU:";
         const char* names[] = {
-            "Antoni Narożny",
+            "Antony Narożny",
             "Szymon Zakierski",
             "Dawid",
             "Franciszek"

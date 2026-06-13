@@ -88,7 +88,10 @@ public:
                 transitionTimer = 0.0f;
             }
         }
-        if (currentState && !transitioning) currentState->Update(deltaTime, countryPtr);
+        if (currentState && !transitioning) {
+            currentState->Update(deltaTime, countryPtr);
+            currentState->LateUpdate();
+        }
     }
 
     void Draw() {

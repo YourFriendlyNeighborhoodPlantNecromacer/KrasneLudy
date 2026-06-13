@@ -13,6 +13,7 @@ public:
 
 	// Aktualizacja (głównie logika) i rysowanie (oddzielnie)
 	virtual void Update(float deltaTime, country* countryPtr) = 0;
+	virtual void LateUpdate() {};
 	virtual void Draw() = 0;
 };
 
