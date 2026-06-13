@@ -59,7 +59,6 @@ void generateCodes(node* root, std::string code, std::array<std::string, 256>& h
 }
 
 void huffman_compression(const std::string& inputPath, const std::string& outputPath) {
-    std::cout << "oh so thight kawaii" << std::endl;
     std::ifstream tekst(inputPath, std::ios::binary);
     if (!tekst.is_open()) {
         std::cerr << "Error: Could not open input file " << inputPath << std::endl;
