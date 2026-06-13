@@ -379,8 +379,6 @@ bool country::assignDwarfsToWorkplaces(const std::string& outputFile){
 
         minCostMaxFlow(graph, source, sink);
 
-        bool foundAssignment = false;
-
         for(int64_t h = 0; h < housesCount; h++){
             int64_t houseVertex = houseOffset + h;
 
@@ -393,7 +391,6 @@ bool country::assignDwarfsToWorkplaces(const std::string& outputFile){
                     workplaces[materialType][workplaceIndex]->amountOfDwarfsWorking++;
 
                     file << h << ';' << workplaceIndex << '\n';
-                    foundAssignment = true;
                     break;
                 }
             }
