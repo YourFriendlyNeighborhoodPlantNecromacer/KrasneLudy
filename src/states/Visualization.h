@@ -170,7 +170,7 @@ class Visualization : public GameState {
     float gridThickness = 1.0f;
 
     Visualization(country* mapPointer)
-        : mapPointer(mapPointer), backgroundTexture{0}, uiFont{0} {
+        : backgroundTexture{0}, uiFont{0}, mapPointer(mapPointer) {
         camera = { 0 };
     }
 
