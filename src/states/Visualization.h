@@ -4,6 +4,7 @@
 #include "../backend/GameState.h"
 #include "../backend/StateManager.h"
 #include "../backend/UIHelpers.h"
+#include "../backend/GraphProcessing.h"
 #include "../backend/classes/Button.h"
 #include "../backend/classes/Slider.h"
 #include <fstream>
@@ -18,22 +19,6 @@ inline void GoToTitle(country* countryPtr);
 
 static constexpr float MARKER_RADIUS = 32.0f;
 static constexpr float MARKER_THICKNESS = 3.0f;
-
-struct Road {
-    Vector2 start;
-    Vector2 end;
-    Color color;
-    int material;
-};
-
-struct RimPoint {
-    Vector2 position;
-    int material;
-};
-
-std::vector<Road> roadConnections;
-std::vector<RimPoint> rimPoints;
-std::vector<bool> worldMaterialFilter;
 
 static inline void DrawWorkplaceMarker(float x, float y, Color fill) {
     Vector2 top = { x, y - MARKER_RADIUS };
@@ -139,7 +124,7 @@ class Visualization : public GameState {
     static constexpr float MENU_TEXT_OFFSET_Y = 6.0f;
 
     static constexpr float OVERLAY_ALPHA = 0.9f;
-    static constexpr float VIEWPORT_DIM_ALPHA = 0.15f;
+    static constexpr float VIEWPORT_DIM_ALPHA = 0.25f;
     static constexpr unsigned char SELECTOR_COLOR_R = 96;
     static constexpr unsigned char SELECTOR_COLOR_G = 96;
 
@@ -222,69 +207,6 @@ class Visualization : public GameState {
         sliderMapSize = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 400.0f, 10000.0f, Config::MAP_SIZE, GRID_STEP * 2.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderGridOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, gridOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderGridThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.1f, 10.0f, gridThickness, 0.5f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
-
-        worldMaterialFilter.assign(namedValues::material::size, true);
-
-        LoadAssignments();
-        LoadRimPoints();
-    }
-
-    void LoadAssignments() {
-        roadConnections.clear();
-        std::ifstream file("dwarf_workplace_assignment_file_1.txt");
-        if (!file.is_open()) return;
-
-        std::string line;
-        for (int m = 0; m < namedValues::material::size; ++m) {
-            while (std::getline(file, line)) {
-                if (line == ";;") break;
-                if (line.empty()) continue;
-
-                size_t sep = line.find(';');
-                if (sep == std::string::npos) continue;
-
-                int hIdx = std::stoi(line.substr(0, sep));
-                int wIdx = std::stoi(line.substr(sep + 1));
-
-                const auto& houses = mapPointer->getHouses()[m];
-                const auto& workplaces = mapPointer->getWorkplaces()[m];
-
-                if (hIdx <= houses.getLastIndex() && wIdx <= workplaces.getLastIndex()) {
-                    auto& house = houses[hIdx];
-                    auto& wp = workplaces[wIdx];
-                    if (house && wp) {
-                        Vector2 start = { (float)house->coordinates[namedValues::axis::X], (float)house->coordinates[namedValues::axis::Y] };
-                        Vector2 end = { (float)wp->coordinates[namedValues::axis::X], (float)wp->coordinates[namedValues::axis::Y] };
-                        Color color = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(m));
-                        roadConnections.push_back({ start, end, color, m });
-                    }
-                }
-            }
-        }
-    }
-
-    void LoadRimPoints() {
-        rimPoints.clear();
-        std::ifstream file("rim_constructing_workplaces_file_1.txt");
-        if (!file.is_open()) return;
-
-        std::string line;
-
-        while (std::getline(file, line)) {
-            if (line.empty()) continue;
-
-            size_t sep = line.find(';');
-            if (sep == std::string::npos) continue;
-
-            int matIDX = std::stoi(line.substr(0, sep));
-            int workIDX = std::stoi(line.substr(sep + 1));
-
-            const auto& workplace = mapPointer->getWorkplaces()[matIDX][workIDX];
-            if (workplace) {
-                Vector2 pos = { (float)workplace->coordinates[namedValues::axis::X], (float)workplace->coordinates[namedValues::axis::Y] };
-                rimPoints.push_back({ pos, matIDX });
-            }
-        }
     }
 
     void Update(float deltaTime, country* countryPtr) override {

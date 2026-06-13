@@ -2,6 +2,7 @@
 #include "src/backend/StateManager.h"
 #include "src/backend/SettingsManager.h"
 #include "src/states/Title.h"
+#include "src/backend/GraphProcessing.h"
 #include "src/Constants.h"
 #include "src/backend/UIHelpers.h"
 #include "GLUGLU/functions/country_generator.h"
@@ -18,6 +19,10 @@ void calculationsAndLogis(country& kingdom, const std::string baseFileName){
     std::cout << "AAAA" << std::endl;
     huffman_compression(directory + outputFileForWorkplaceAssignment, directory + "compressed_" + outputFileForWorkplaceAssignment);
     huffman_compression(directory + outputFileForRimPoints, directory + "compressed_" + outputFileForRimPoints);
+
+    InitGraphFilter();
+    LoadAssignments(&kingdom, baseFileName);
+    LoadRimPoints(&kingdom, baseFileName);
 }
 
 void render_and_graphics(country& kingdom, float screenWidth, float screenHeight, const char* windowName){
@@ -91,6 +96,7 @@ int main (int argc, char** argv) {
 
     if(std::filesystem::create_directories(baseFileName)) std::cout << "WOW";
     calculationsAndLogis(kingdomCountry, baseFileName);
+
     render_and_graphics(kingdomCountry, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, "AiSD II - Projekt Krasnoludki");
 
     /**/

@@ -1,10 +1,12 @@
+#ifndef HUFFMAN_COMPRESSION_H
+#define HUFFMAN_COMPRESSION_H
+
 #include <fstream>
 #include <iostream>
 #include <queue>
 #include <vector>
 #include <string>
 #include <array>
-#
 
 struct node {
     long long frequency;
@@ -231,3 +233,5 @@ void huffman_decompression(const std::string& inputPath, const std::string& outp
     binarny.close();
     deleteTree(root);
 }
+
+#endif // HUFFMAN_COMPRESSION_H
