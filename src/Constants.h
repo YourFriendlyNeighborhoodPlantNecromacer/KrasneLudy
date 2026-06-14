@@ -61,6 +61,8 @@ namespace Config {
     };
 
     const Color RIM_COLOR = Color{255,196,0,255};
+
+    constexpr float DECAMETER_DISTANCE = 10.0f;
 }
 
 namespace UI {

@@ -56,6 +56,19 @@ static inline void DrawHouseMarker(float x, float y, Color fill) {
     DrawLineEx(right, roof, MARKER_THICKNESS, WHITE);
 }
 
+static inline void DrawGuardMarker(float x, float y, int64_t power, float zoom, Font font, bool isLoudest) {
+    Color mainCol = isLoudest ? GOLD : LIME;
+    Color lineCol = isLoudest ? ORANGE : DARKGREEN;
+    float radius = isLoudest ? 8.0f : 6.0f;
+
+    DrawCircleV({x, y}, radius, mainCol);
+    DrawCircleLinesV({x, y}, radius, lineCol);
+
+    if (zoom > 2.0f) {
+        DrawTextEx(font, TextFormat("%lld", power), {x + radius + 2, y - 4}, 12, 1, isLoudest ? GOLD : RAYWHITE);
+    }
+}
+
 static inline void DrawCountryEntities(const country* c) {
     const auto& workplaces = c->getWorkplaces();
     const auto& houses = c->getHouses();
@@ -141,6 +154,7 @@ class Visualization : public GameState {
     UI::Button btnRoadOptions;
     UI::Button btnWorldOptions;
     UI::Button btnRimOptions;
+    UI::Button btnToggleGuards;
 
     UI::Slider sliderRoadThickness;
     UI::Slider sliderRoadOpacity;
@@ -156,6 +170,7 @@ class Visualization : public GameState {
 
     bool showRoads = false;
     bool showRim = false;
+    bool showGuards = false;
 
     bool showRoadOptions = false;
     bool showRimOptions = false;
@@ -197,6 +212,7 @@ class Visualization : public GameState {
         btnWorldOptions = UI::Button({ btnBack.bounds.x + UI_BTN_WORLD_X_OFFSET, btnBack.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "OPCJE ŚWIATA", uiFont);
         btnToggleRim = UI::Button({btnWorldOptions.bounds.x, btnToggleRoads.bounds.y, UI::BUTTON_WIDTH - UI_BTN_TOGGLE_WIDTH_DELTA, UI_BTN_HEIGHT}, "RYSUJ OBWÓDKĘ", uiFont);
         btnRimOptions = UI::Button({ btnToggleRim.bounds.x + btnToggleRim.bounds.width + MENU_MARGIN, btnToggleRim.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
+        btnToggleGuards = UI::Button({ btnToggleRim.bounds.x + UI_BTN_WORLD_X_OFFSET, btnToggleRim.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "DEKAMETROWCY", uiFont);
 
         sliderRoadThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 1.0f, 30.0f, roadThickness, 1.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderRoadOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, roadOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
@@ -380,7 +396,7 @@ class Visualization : public GameState {
         btnToggleRim.hoverColor = showRim ? DARKGREEN : DARKGRAY;
         btnToggleRim.regularColor = showRim ? Color{0, 160, 0, 255} : GRAY;
 
-        bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false, rimClicked = false, rimOptionsClicked = false;
+        bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false, rimClicked = false, rimOptionsClicked = false, guardsClicked = false;
         if (!inputConsumedByMenu) {
             backClicked = btnBack.Update();
             roadsClicked = btnToggleRoads.Update();
@@ -388,6 +404,7 @@ class Visualization : public GameState {
             worldClicked = btnWorldOptions.Update();
             rimClicked = btnToggleRim.Update();
             rimOptionsClicked = btnRimOptions.Update();
+            guardsClicked = btnToggleGuards.Update();
 
             if (btnBack.IsHovered()) selectedItem = 0;
             else if (btnToggleRoads.IsHovered()) selectedItem = 1;
@@ -395,6 +412,7 @@ class Visualization : public GameState {
             else if (btnWorldOptions.IsHovered()) selectedItem = 3;
             else if (btnToggleRim.IsHovered()) selectedItem = 4;
             else if (btnRimOptions.IsHovered()) selectedItem = 5;
+            else if (btnToggleGuards.IsHovered()) selectedItem = 6;
             else selectedItem = -1;
         } else {
             selectedItem = -1;
@@ -439,6 +457,9 @@ class Visualization : public GameState {
                 showRoadOptions = false;
                 showWorldOptions = false;
             }
+        } else if (guardsClicked) {
+            UI::PlaySelectSound();
+            showGuards = !showGuards;
         }
     }
 
@@ -472,6 +493,17 @@ class Visualization : public GameState {
         }
     }
 
+    void DrawGuards() {
+        if (guards.empty()) return;
+
+        int64_t maxPower = guardsTree ? guardsTree->findMaxBetween(0, (int64_t)guards.size() - 1) : -1;
+
+        for (const auto& guard : guards) {
+            Vector2 pos = { guard.position.x * Config::MAP_HALF, guard.position.y * Config::MAP_HALF };
+            DrawGuardMarker(pos.x, pos.y, guard.voicePower, camera.zoom, uiFont, (guard.voicePower == maxPower));
+        }
+    }
+
     void Draw() override {
         UI::DrawTiledBackground(backgroundTexture);
 
@@ -492,6 +524,8 @@ class Visualization : public GameState {
 
                 // Rysuj mapę jednostek kraju
                 DrawCountryEntities(mapPointer);
+
+                if (showGuards) DrawGuards();
             EndMode2D();
         EndScissorMode();
 
@@ -503,10 +537,12 @@ class Visualization : public GameState {
         btnRimOptions.Draw();
         btnRoadOptions.Draw();
         btnWorldOptions.Draw();
+        btnToggleGuards.Draw();
 
         if (selectedItem != -1) {
             Rectangle r = (selectedItem == 0) ? btnBack.bounds : (selectedItem == 1 ? btnToggleRoads.bounds : (selectedItem == 2 ? btnRoadOptions.bounds :
-                        (selectedItem == 3 ? btnWorldOptions.bounds : (selectedItem == 4 ? btnToggleRim.bounds : btnRimOptions.bounds))));
+                        (selectedItem == 3 ? btnWorldOptions.bounds : (selectedItem == 4 ? btnToggleRim.bounds :
+                        (selectedItem == 5 ? btnRimOptions.bounds : btnToggleGuards.bounds)))));
 
             DrawRectangleLinesEx({ r.x - UI::SELECTOR_PADDING, r.y - UI::SELECTOR_PADDING, r.width + (UI::SELECTOR_PADDING * 2.0f), r.height + (UI::SELECTOR_PADDING * 2.0f) }, UI::SELECTOR_THICKNESS, Color{SELECTOR_COLOR_R, SELECTOR_COLOR_G, 0, 255});
         }

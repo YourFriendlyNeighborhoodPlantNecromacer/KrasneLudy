@@ -10,6 +10,8 @@
 #include "../../DataStructures/country.h"
 #include "../Constants.h"
 #include "../../GLUGLU/functions/huffman_compression.h"
+#include "../../GLUGLU/datastructures/intervalTree.h"
+#include <cmath>
 
 struct Road {
     Vector2 start;
@@ -23,8 +25,15 @@ struct RimPoint {
     int material;
 };
 
+struct Guard {
+    Vector2 position;
+    int64_t voicePower;
+};
+
 inline std::vector<Road> roadConnections;
 inline std::vector<RimPoint> rimPoints;
+inline std::vector<Guard> guards;
+inline intervalTree* guardsTree = nullptr;
 inline std::vector<bool> worldMaterialFilter;
 
 inline void InitGraphFilter() {
@@ -92,6 +101,41 @@ inline void LoadRimPoints(country* mapPointer, const std::string& baseFileName) 
     }
 }
 
+inline void LoadGuards(const std::string& baseFileName) {
+    guards.clear();
+    if (guardsTree) { delete guardsTree; guardsTree = nullptr; }
+
+    std::string path = baseFileName + "/" + baseFileName + "_guards.txt";
+    std::ifstream file(path);
+    if (!file.is_open()) return;
+
+    dynamicArray<int64_t> powers;
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+        size_t firstSep = line.find(';');
+        size_t secondSep = line.find(';', firstSep + 1);
+        if (firstSep == std::string::npos || secondSep == std::string::npos) continue;
+
+        float x = std::stof(line.substr(0, firstSep));
+        float y = std::stof(line.substr(firstSep + 1, secondSep - firstSep - 1));
+        int64_t power = std::stoll(line.substr(secondSep + 1));
+
+        guards.push_back({ {x, y}, power });
+        powers.append(power);
+    }
+
+    if (!powers.isEmpty()) {
+        guardsTree = new intervalTree(powers);
+    }
+}
+
+inline float Vector2Dist(Vector2 v1, Vector2 v2) {
+    float dx = v1.x - v2.x;
+    float dy = v1.y - v2.y;
+    return std::sqrt(dx * dx + dy * dy);
+}
+
 inline void LogTime(const std::string& label, std::chrono::high_resolution_clock::time_point start, const std::string& prefix = "[LOG]") {
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration<double, std::milli>(end - start).count();
@@ -104,6 +148,7 @@ inline void ProcessCountryData(country& kingdom, const std::string& baseFileName
     const std::string directory = baseFileName + "/";
     const std::string outputFileForWorkplaceAssignment = baseFileName + "_dwarf_workplace_assignment.txt";
     const std::string outputFileForRimPoints = baseFileName + "_rim_variables.txt";
+    const std::string outputFileForGuards = baseFileName + "_guards.txt";
 
     auto measure = [](const std::string& label, auto task) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -120,14 +165,47 @@ inline void ProcessCountryData(country& kingdom, const std::string& baseFileName
     measure("Constructing Rim", [&]() { rim = kingdom.constructRimAroundCountry(); });
     measure("Saving Active Workplaces", [&]() { kingdom.saveActiveWorkplaces(std::move(rim), directory + outputFileForRimPoints); });
 
-    measure("Huffman Compression", [&]() {
-        huffman_compression(directory + outputFileForWorkplaceAssignment, directory + "compressed_" + outputFileForWorkplaceAssignment);
-        huffman_compression(directory + outputFileForRimPoints, directory + "compressed_" + outputFileForRimPoints);
-    });
-
     InitGraphFilter();
     measure("Loading Assignments From File", [&]() { LoadAssignments(&kingdom, baseFileName); });
     measure("Loading Rim Points From File", [&]() { LoadRimPoints(&kingdom, baseFileName); });
+
+    measure("Generating Dekametrowcy", [&]() {
+        guards.clear();
+        if (rimPoints.empty()) return;
+
+        std::ofstream gFile(directory + outputFileForGuards);
+        dynamicArray<int64_t> powers;
+
+        for (size_t i = 0; i < rimPoints.size(); ++i) {
+            Vector2 p1 = rimPoints[i].position;
+            Vector2 p2 = rimPoints[(i + 1) % rimPoints.size()].position;
+
+            float segLen = Vector2Dist(p1, p2) * (Config::MAP_HALF / 2);
+            int guardsOnSeg = std::max(1, (int)(segLen / Config::DECAMETER_DISTANCE));
+
+            for (int j = 0; j < guardsOnSeg; ++j) {
+                float t = (float)j / (float)guardsOnSeg;
+                Vector2 pos = { p1.x + (p2.x - p1.x) * t, p1.y + (p2.y - p1.y) * t };
+                int64_t power = GetRandomValue(20, 100); // Głośność
+
+                guards.push_back({ pos, power });
+                powers.append(power);
+                gFile << pos.x << ";" << pos.y << ";" << power << "\n";
+            }
+        }
+        gFile.close();
+
+        if (guardsTree) delete guardsTree;
+        guardsTree = new intervalTree(powers);
+    });
+
+    measure("Huffman Compression", [&]() {
+        huffman_compression(directory + outputFileForWorkplaceAssignment, directory + "compressed_" + outputFileForWorkplaceAssignment);
+        huffman_compression(directory + outputFileForRimPoints, directory + "compressed_" + outputFileForRimPoints);
+        huffman_compression(directory + outputFileForGuards, directory + "compressed_" + outputFileForGuards);
+    });
+
+    measure("Loading Guards", [&]() { LoadGuards(baseFileName); });
 
     LogTime("TOTAL TIME TAKEN:", startTotal, "[INFO]");
     std::cout << std::endl;

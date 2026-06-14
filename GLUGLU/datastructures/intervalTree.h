@@ -12,7 +12,7 @@ class intervalTree{
         int64_t leftBound;
         int64_t rightBound;
         int64_t localMax;
-        node(int64_t localMax, int64_t leftBound, int64_t rightBound, node* leftChild = nullptr, node* rightChild = nullptr) : localMax(localMax), leftNode(leftChild), rightNode(rightChild), leftBound(leftBound), rightBound(rightBound){}
+        node(int64_t localMax, int64_t leftBound, int64_t rightBound, node* leftChild = nullptr, node* rightChild = nullptr) : leftNode(leftChild), rightNode(rightChild), leftBound(leftBound), rightBound(rightBound), localMax(localMax){}
         ~node(){
             delete leftNode;
             delete rightNode;
