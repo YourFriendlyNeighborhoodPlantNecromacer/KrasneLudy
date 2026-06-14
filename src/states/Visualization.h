@@ -396,6 +396,9 @@ class Visualization : public GameState {
         btnToggleRim.hoverColor = showRim ? DARKGREEN : DARKGRAY;
         btnToggleRim.regularColor = showRim ? Color{0, 160, 0, 255} : GRAY;
 
+        btnToggleGuards.hoverColor = showGuards ? DARKGREEN : DARKGRAY;
+        btnToggleGuards.regularColor = showGuards ? Color{0, 160, 0, 255} : GRAY;
+
         bool backClicked = false, roadsClicked = false, optionsClicked = false, worldClicked = false, rimClicked = false, rimOptionsClicked = false, guardsClicked = false;
         if (!inputConsumedByMenu) {
             backClicked = btnBack.Update();
