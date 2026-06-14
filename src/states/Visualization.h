@@ -121,7 +121,6 @@ class Visualization : public GameState {
     static constexpr float UI_BTN_SPACING_Y = 10.0f;
     static constexpr float UI_BTN_TOGGLE_WIDTH_DELTA = 60.0f;
     static constexpr float UI_BTN_OPTION_WIDTH = 55.0f;
-    static constexpr float UI_BTN_WORLD_X_OFFSET = 240.0f;
 
     static constexpr float ROAD_OPTIONS_EXTRA_HEIGHT = 135.0f;
     static constexpr float WORLD_OPTIONS_HEIGHT = 240.0f;
@@ -214,13 +213,15 @@ class Visualization : public GameState {
 
         uiFont = UI::LoadStandardFont((int)UI::HEADER_FONT_SIZE);
 
+        float colOffset = (viewportArea.width - UI::BUTTON_WIDTH) / 2.0f;
+
         btnBack = UI::Button({ viewportArea.x, viewportArea.y + viewportArea.height + UI_BTN_OFFSET_Y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "WYJDŹ", uiFont, MAROON, RED);
         btnToggleRoads = UI::Button({ viewportArea.x, btnBack.bounds.y + btnBack.bounds.height + UI_BTN_SPACING_Y, UI::BUTTON_WIDTH - UI_BTN_TOGGLE_WIDTH_DELTA, UI_BTN_HEIGHT }, "RYSUJ DROGI", uiFont);
         btnRoadOptions = UI::Button({ btnToggleRoads.bounds.x + btnToggleRoads.bounds.width + MENU_MARGIN, btnToggleRoads.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
-        btnWorldOptions = UI::Button({ btnBack.bounds.x + UI_BTN_WORLD_X_OFFSET, btnBack.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "OPCJE ŚWIATA", uiFont);
+        btnWorldOptions = UI::Button({ btnBack.bounds.x + colOffset, btnBack.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "OPCJE ŚWIATA", uiFont);
         btnToggleRim = UI::Button({btnWorldOptions.bounds.x, btnToggleRoads.bounds.y, UI::BUTTON_WIDTH - UI_BTN_TOGGLE_WIDTH_DELTA, UI_BTN_HEIGHT}, "RYSUJ OBWÓDKĘ", uiFont);
         btnRimOptions = UI::Button({ btnToggleRim.bounds.x + btnToggleRim.bounds.width + MENU_MARGIN, btnToggleRim.bounds.y, UI_BTN_OPTION_WIDTH, UI_BTN_HEIGHT }, "...", uiFont);
-        btnToggleGuards = UI::Button({ btnToggleRim.bounds.x + UI_BTN_WORLD_X_OFFSET, btnToggleRim.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "DEKAMETROWCY", uiFont);
+        btnToggleGuards = UI::Button({ btnToggleRim.bounds.x + colOffset, btnToggleRim.bounds.y, UI::BUTTON_WIDTH, UI_BTN_HEIGHT }, "DEKAMETROWCY", uiFont);
 
         sliderRoadThickness = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 1.0f, 30.0f, roadThickness, 1.0f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
         sliderRoadOpacity = UI::Slider({ 0, 0, SLIDER_WIDTH, SLIDER_HEIGHT }, 0.0f, 1.0f, roadOpacity, 0.05f, "", uiFont, 0, (int)SLIDER_KNOB_SIZE, 0);
