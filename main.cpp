@@ -69,7 +69,7 @@ int main (int argc, char** argv) {
     country kingdomCountry;
     std::string baseFileName;
     if(argc == 2){
-        baseFileName = argv[1];
+        baseFileName = std::filesystem::path(argv[1]).stem().string();
         if(std::filesystem::create_directories(baseFileName)) std::cout << "WOW";
         ProcessCountryData(kingdomCountry, baseFileName);
     }
