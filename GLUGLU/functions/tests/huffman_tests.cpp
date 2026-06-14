@@ -6,7 +6,7 @@
 #include <iterator>
 #include <cstdio>
 
-#include "../huffman_compression.cpp"
+#include "../huffman_compression.h"
 
 bool file_exists(const std::string& path) {
     std::ifstream f(path.c_str());
@@ -39,7 +39,7 @@ void run_huffman_test(const std::string& testName, const std::string& content) {
     std::replace(safeName.begin(), safeName.end(), ' ', '_');
 
     std::string inputPath = safeName + "_input.txt";
-    std::string compressedPath = safeName + "_compressed.bin";
+    std::string compressedPath = safeName + "_compressed.txt";
     std::string outputPath = safeName + "_output.txt";
 
     create_test_input(inputPath, content);
