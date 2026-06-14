@@ -29,10 +29,10 @@ static inline void DrawWorkplaceMarker(float x, float y, Color fill) {
     DrawTriangle(top, bottom, right, fill);
     DrawTriangle(top, left, bottom, fill);
 
-    DrawLineEx(top, right, MARKER_THICKNESS, BLACK);
-    DrawLineEx(right, bottom, MARKER_THICKNESS, BLACK);
-    DrawLineEx(bottom, left, MARKER_THICKNESS, BLACK);
-    DrawLineEx(left, top, MARKER_THICKNESS, BLACK);
+    DrawLineEx(top, right, MARKER_THICKNESS, Config::WORKPLACE_OUTLINE);
+    DrawLineEx(right, bottom, MARKER_THICKNESS, Config::WORKPLACE_OUTLINE);
+    DrawLineEx(bottom, left, MARKER_THICKNESS, Config::WORKPLACE_OUTLINE);
+    DrawLineEx(left, top, MARKER_THICKNESS, Config::WORKPLACE_OUTLINE);
 }
 
 static constexpr float HOUSE_HALF_WIDTH = 32.0f;
@@ -49,23 +49,30 @@ static inline void DrawHouseMarker(float x, float y, Color fill) {
     DrawRectangleRec({ left.x, left.y, HOUSE_HALF_WIDTH * 2.0f, HOUSE_BODY_HEIGHT }, fill);
     DrawTriangle(roof, left, right, fill);
 
-    DrawLineEx(roof, left, MARKER_THICKNESS, WHITE);
-    DrawLineEx(left, bottomLeft, MARKER_THICKNESS, WHITE);
-    DrawLineEx(bottomLeft, bottomRight, MARKER_THICKNESS, WHITE);
-    DrawLineEx(bottomRight, right, MARKER_THICKNESS, WHITE);
-    DrawLineEx(right, roof, MARKER_THICKNESS, WHITE);
+    DrawLineEx(roof, left, MARKER_THICKNESS, Config::HOUSE_OUTLINE);
+    DrawLineEx(left, bottomLeft, MARKER_THICKNESS, Config::HOUSE_OUTLINE);
+    DrawLineEx(bottomLeft, bottomRight, MARKER_THICKNESS, Config::HOUSE_OUTLINE);
+    DrawLineEx(bottomRight, right, MARKER_THICKNESS, Config::HOUSE_OUTLINE);
+    DrawLineEx(right, roof, MARKER_THICKNESS, Config::HOUSE_OUTLINE);
 }
 
-static inline void DrawGuardMarker(float x, float y, int64_t power, float zoom, Font font, bool isLoudest) {
-    Color mainCol = isLoudest ? GOLD : LIME;
-    Color lineCol = isLoudest ? ORANGE : DARKGREEN;
-    float radius = isLoudest ? 8.0f : 6.0f;
+static inline void DrawGuardMarker(float x, float y, long long power, float zoom, Font font, bool isLoudest, bool isSelected = false) {
+    Color mainCol = isLoudest ? Config::GUARD_COLOR_LOUDEST : (isSelected ? Config::GUARD_COLOR_SELECTED : Config::GUARD_COLOR_DEFAULT);
+    Color lineCol = isLoudest ? Config::GUARD_OUTLINE_LOUDEST : (isSelected ? Config::GUARD_OUTLINE_SELECTED : Config::GUARD_OUTLINE_DEFAULT);
+    float radius = (isLoudest || isSelected) ? 10.0f : 8.0f;
 
     DrawCircleV({x, y}, radius, mainCol);
     DrawCircleLinesV({x, y}, radius, lineCol);
+    if (isSelected) DrawCircleLinesV({x, y}, radius + 2.0f, Config::GUARD_RING_SELECTED);
 
-    if (zoom > 2.0f) {
-        DrawTextEx(font, TextFormat("%lld", power), {x + radius + 2, y - 4}, 12, 1, isLoudest ? GOLD : RAYWHITE);
+    if (zoom > 1.2f) {
+        // Sprawdzanie na podstawie jak oko widzi kolory
+        float brightness = (mainCol.r * 0.299f + mainCol.g * 0.587f + mainCol.b * 0.114f) / 255.0f;
+        Color textCol = (brightness > 0.6f) ? BLACK : Config::GUARD_TEXT_DEFAULT;
+
+        const char* text = TextFormat("%lld", power);
+        Vector2 textSize = MeasureTextEx(font, text, 10, 1);
+        DrawTextEx(font, text, { x - textSize.x / 2.0f, y - textSize.y / 2.0f }, 10, 1, textCol);
     }
 }
 
@@ -77,13 +84,13 @@ static inline void DrawCountryEntities(const country* c) {
         if (worldMaterialFilter[materialType]) {
             Color fill = Config::MATERIAL_COLORS.at(static_cast<namedValues::material>(materialType));
 
-            for(int64_t i = 0; i <= workplaces[materialType].getLastIndex(); i++) {
+            for(long long i = 0; i <= workplaces[materialType].getLastIndex(); i++) {
                 const auto& wp = workplaces[materialType][i];
                 if(!wp) continue;
                 DrawWorkplaceMarker((float)wp->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)wp->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
             }
 
-            for(int64_t i = 0; i <= houses[materialType].getLastIndex(); i++) {
+            for(long long i = 0; i <= houses[materialType].getLastIndex(); i++) {
                 const auto& housePtr = houses[materialType][i];
                 if(!housePtr) continue;
                 DrawHouseMarker((float)housePtr->coordinates[namedValues::axis::X] * Config::MAP_HALF, (float)housePtr->coordinates[namedValues::axis::Y] * Config::MAP_HALF, fill);
@@ -138,8 +145,6 @@ class Visualization : public GameState {
 
     static constexpr float OVERLAY_ALPHA = 0.9f;
     static constexpr float VIEWPORT_DIM_ALPHA = 0.25f;
-    static constexpr unsigned char SELECTOR_COLOR_R = 96;
-    static constexpr unsigned char SELECTOR_COLOR_G = 96;
 
     Texture2D backgroundTexture;
     Rectangle viewportArea;
@@ -167,6 +172,9 @@ class Visualization : public GameState {
     int selectedItem = -1;
     int lastSelectedItem = -1;
     int lastOverlayHoveredItem = -1;
+
+    long long selectedGuardA = -1;
+    long long selectedGuardB = -1;
 
     bool showRoads = false;
     bool showRim = false;
@@ -231,6 +239,9 @@ class Visualization : public GameState {
             GoToTitle(mapPointer);
         }
 
+        bool inputConsumedByMenu = false;
+        Vector2 mouse = GetMousePosition();
+
         float panSpeed = PAN_SPEED_BASE * deltaTime / camera.zoom;
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    camera.target.y -= panSpeed;
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  camera.target.y += panSpeed;
@@ -260,12 +271,42 @@ class Visualization : public GameState {
             }
         }
 
+        if (showGuards) {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !inputConsumedByMenu) {
+                Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
+                float hitRadius = 15.0f / camera.zoom;
+                if (hitRadius < 5.0f) hitRadius = 5.0f;
+
+                for (size_t i = 0; i < guards.size(); ++i) {
+                    // Konwersja ze znormalizowanych [0, 1] na światowe [-MAP_HALF, MAP_HALF]
+                    Vector2 gPos = {
+                        (guards[i].position.x * 2.0f - 1.0f) * Config::MAP_HALF,
+                        (guards[i].position.y * 2.0f - 1.0f) * Config::MAP_HALF
+                    };
+
+                    if (CheckCollisionPointCircle(mouseWorld, gPos, hitRadius)) {
+                        if (selectedGuardA != -1 && selectedGuardB != -1) {
+                            selectedGuardA = (long long)i;
+                            selectedGuardB = -1;
+                        } else if (selectedGuardA == -1) {
+                            selectedGuardA = (long long)i;
+                        } else {
+                            selectedGuardB = (long long)i;
+                        }
+                        UI::PlaySelectSound();
+                        break;
+                    }
+                }
+            }
+            if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+                selectedGuardA = -1;
+                selectedGuardB = -1;
+            }
+        }
+
         // Clamp camera target to map dimensions
         camera.target.x = fminf(fmaxf(camera.target.x, -Config::MAP_HALF), Config::MAP_HALF);
         camera.target.y = fminf(fmaxf(camera.target.y, -Config::MAP_HALF), Config::MAP_HALF);
-
-        bool inputConsumedByMenu = false;
-        Vector2 mouse = GetMousePosition();
 
         if (showRoadOptions) {
             float fullH = ROAD_OPTIONS_TOTAL_HEIGHT + ROAD_OPTIONS_EXTRA_HEIGHT;
@@ -463,6 +504,8 @@ class Visualization : public GameState {
         } else if (guardsClicked) {
             UI::PlaySelectSound();
             showGuards = !showGuards;
+            selectedGuardA = -1;
+            selectedGuardB = -1;
         }
     }
 
@@ -499,11 +542,47 @@ class Visualization : public GameState {
     void DrawGuards() {
         if (guards.empty()) return;
 
-        int64_t maxPower = guardsTree ? guardsTree->findMaxBetween(0, (int64_t)guards.size() - 1) : -1;
+        bool hasRange = (selectedGuardA != -1 && selectedGuardB != -1);
+        long long targetPower = -1;
+        long long nGuards = (long long)guards.size();
+        bool useWrapRange = false;
 
-        for (const auto& guard : guards) {
-            Vector2 pos = { guard.position.x * Config::MAP_HALF, guard.position.y * Config::MAP_HALF };
-            DrawGuardMarker(pos.x, pos.y, guard.voicePower, camera.zoom, uiFont, (guard.voicePower == maxPower));
+        // Sprawdza króta droga jest najkrótsza
+        if (hasRange && guardsTree) {
+            long long iMin = std::min(selectedGuardA, selectedGuardB);
+            long long iMax = std::max(selectedGuardA, selectedGuardB);
+            long long distLinear = iMax - iMin;
+            long long distWrap = nGuards - distLinear;
+
+            if (distLinear <= distWrap) {
+                targetPower = guardsTree->findMaxBetween(iMin, iMax);
+            } else {
+                useWrapRange = true;
+                targetPower = std::max(guardsTree->findMaxBetween(iMax, nGuards - 1), guardsTree->findMaxBetween(0, iMin));
+            }
+        } else if (guardsTree) {
+            targetPower = guardsTree->findMaxBetween(0, nGuards - 1);
+        }
+
+        // Główna funkcja resująca
+        for (size_t i = 0; i < guards.size(); ++i) {
+            // Konwersja ze znormalizowanych [0, 1] na światowe [-MAP_HALF, MAP_HALF]
+            Vector2 worldPos = {
+                (guards[i].position.x * 2.0f - 1.0f) * Config::MAP_HALF,
+                (guards[i].position.y * 2.0f - 1.0f) * Config::MAP_HALF
+            };
+
+            bool isLoudest = (guards[i].voicePower == targetPower);
+
+            if (hasRange) {
+                long long iMin = std::min(selectedGuardA, selectedGuardB);
+                long long iMax = std::max(selectedGuardA, selectedGuardB);
+                bool inRange = useWrapRange ? ((long long)i >= iMax || (long long)i <= iMin) : ((long long)i >= iMin && (long long)i <= iMax);
+                isLoudest = isLoudest && inRange;
+            }
+
+            bool isSelected = (i == (size_t)selectedGuardA || i == (size_t)selectedGuardB);
+            DrawGuardMarker(worldPos.x, worldPos.y, guards[i].voicePower, camera.zoom, uiFont, isLoudest, isSelected);
         }
     }
 
@@ -547,7 +626,7 @@ class Visualization : public GameState {
                         (selectedItem == 3 ? btnWorldOptions.bounds : (selectedItem == 4 ? btnToggleRim.bounds :
                         (selectedItem == 5 ? btnRimOptions.bounds : btnToggleGuards.bounds)))));
 
-            DrawRectangleLinesEx({ r.x - UI::SELECTOR_PADDING, r.y - UI::SELECTOR_PADDING, r.width + (UI::SELECTOR_PADDING * 2.0f), r.height + (UI::SELECTOR_PADDING * 2.0f) }, UI::SELECTOR_THICKNESS, Color{SELECTOR_COLOR_R, SELECTOR_COLOR_G, 0, 255});
+            DrawRectangleLinesEx({ r.x - UI::SELECTOR_PADDING, r.y - UI::SELECTOR_PADDING, r.width + (UI::SELECTOR_PADDING * 2.0f), r.height + (UI::SELECTOR_PADDING * 2.0f) }, UI::SELECTOR_THICKNESS, UI::SELECTOR_COLOR);
         }
 
         if (showRimOptions) DrawRimOptionsOverlay();

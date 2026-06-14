@@ -180,17 +180,20 @@ inline void ProcessCountryData(country& kingdom, const std::string& baseFileName
             Vector2 p1 = rimPoints[i].position;
             Vector2 p2 = rimPoints[(i + 1) % rimPoints.size()].position;
 
-            float segLen = Vector2Dist(p1, p2) * (Config::MAP_HALF / 2);
+            float segLen = Vector2Dist(p1, p2) * (Config::MAP_HALF / Config::MAP_DECAMETER_DIVIDE);
             int guardsOnSeg = std::max(1, (int)(segLen / Config::DECAMETER_DISTANCE));
 
             for (int j = 0; j < guardsOnSeg; ++j) {
                 float t = (float)j / (float)guardsOnSeg;
-                Vector2 pos = { p1.x + (p2.x - p1.x) * t, p1.y + (p2.y - p1.y) * t };
-                int64_t power = GetRandomValue(20, 100); // Głośność
+                Vector2 internalPos = { p1.x + (p2.x - p1.x) * t, p1.y + (p2.y - p1.y) * t };
 
-                guards.push_back({ pos, power });
+                // Normalizuj do zakresu [0, 1] dla zapisu do pliku
+                Vector2 normalizedPos = { (internalPos.x + 1.0f) / 2.0f, (internalPos.y + 1.0f) / 2.0f };
+
+                int64_t power = GetRandomValue(20, 100); // Głośność
+                guards.push_back({ normalizedPos, power });
                 powers.append(power);
-                gFile << pos.x << ";" << pos.y << ";" << power << "\n";
+                gFile << normalizedPos.x << ";" << normalizedPos.y << ";" << power << "\n";
             }
         }
         gFile.close();

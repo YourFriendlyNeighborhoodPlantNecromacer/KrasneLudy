@@ -62,7 +62,20 @@ namespace Config {
 
     const Color RIM_COLOR = Color{255,196,0,255};
 
+    const Color WORKPLACE_OUTLINE = BLACK;
+    const Color HOUSE_OUTLINE = WHITE;
+
+    const Color GUARD_COLOR_DEFAULT = LIME;
+    const Color GUARD_OUTLINE_DEFAULT = DARKGREEN;
+    const Color GUARD_COLOR_LOUDEST = GOLD;
+    const Color GUARD_OUTLINE_LOUDEST = ORANGE;
+    const Color GUARD_COLOR_SELECTED = SKYBLUE;
+    const Color GUARD_OUTLINE_SELECTED = BLUE;
+    const Color GUARD_RING_SELECTED = WHITE;
+    const Color GUARD_TEXT_DEFAULT = RAYWHITE;
+
     constexpr float DECAMETER_DISTANCE = 10.0f;
+    constexpr float MAP_DECAMETER_DIVIDE = 4.0f;
 }
 
 namespace UI {
